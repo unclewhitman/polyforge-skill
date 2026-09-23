@@ -1,0 +1,6 @@
+interface:
+  display_name: "PolyForge"
+  short_description: "Cost-aware three-tier coding orchestration with Luna-first implementation"
+  default_prompt: "Take this development request end to end using PolyForge's light, standard, or major flow; prefer Luna for implementation, reserve Astra for major architecture or last-resort rescue, verify the result, and deliver it."
+policy:
+  allow_implicit_invocation: true

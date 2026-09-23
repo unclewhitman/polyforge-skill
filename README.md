@@ -20,4 +20,3 @@ PolyForge v2.1.0 is a Codex skill for taking a coding request from repository di
 `config/model-router.toml` records the role settings and routing gates. Keep it synchronized with the installed custom agent TOML files. PolyForge normally assigns bounded implementation to Luna, uses Astra only for demonstrated major architecture or difficult rescue, and caps automatic Astra use at one invocation per task.
 
 The `scripts/init-project-context.ps1` and `scripts/init-project-context.sh` helpers create a project-local context file when the skill needs one. They are run from the target project, not from this repository.
-
