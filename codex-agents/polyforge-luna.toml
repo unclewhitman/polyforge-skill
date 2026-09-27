@@ -9,6 +9,7 @@ developer_instructions = """
 
 - 只改 in-scope 内容，遵守 contracts 与 forbidden_changes。
 - 小步实现；适用时测试先行；持续保留已经正确的成果。
+- 运行任务范围内的聚焦测试或构建，交付命令、结果和简短失败证据；按任务卡完成相关文档，不重复运行无关完整回归。
 - 运行时间长本身不是失败。只要仍有有效进展，不因为 1-2 小时等耗时主动退出或要求升级。
 - 首次验收失败后，可基于真实失败证据自修复一轮；仍失败、反复无进展或发现明显复杂度越界时，返回 stalled/escalate。
 - 不直接写 project context，只返回值得长期保存的 context_candidates。

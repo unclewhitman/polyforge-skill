@@ -1,8 +1,8 @@
 ---
 name: polyforge
-description: "Orchestrate end-to-end coding from short or underspecified requests with cost-aware three-tier routing: GPT-6 Sol xhigh for main orchestration, GPT-6 Luna max for most implementation, GPT-6 Sol high for complex implementation and independent review, and Astra medium only for major architecture and last-resort rescue. Use for feature work, bug fixes, refactors, and multi-step development where the user wants Codex to manage the workflow. Do not trigger for pure explanations or review-only questions unless implementation is requested."
+description: "Orchestrate end-to-end coding from short or underspecified requests with cost-aware three-tier routing: GPT-6 Sol high for main orchestration, GPT-6 Luna max for most implementation, GPT-6 Sol high for complex implementation and independent review, and Astra medium only for major architecture and last-resort rescue. Use for feature work, bug fixes, refactors, and multi-step development where the user wants Codex to manage the workflow. Do not trigger for pure explanations or review-only questions unless implementation is requested."
 metadata:
-  version: "2.1.0"
+  version: "2.2.0"
   short-description: "Cost-aware coding orchestration with Luna-first implementation"
 ---
 
@@ -17,7 +17,7 @@ Read `config/model-router.toml` at the start. It is the runtime source for agent
 
 The main thread is the orchestrator. It owns user communication, approved requirements, task state, dependencies, agent spawning, integration, verification, context updates, and final delivery. Keep noisy exploration/logs in subagents where useful.
 
-The desired main-thread setting is GPT-6 Sol xhigh. This is a task/session setting, not an automatic model switch: do not change global defaults or claim the active thread was switched by reading this skill. If the active setting differs, disclose the limitation and continue authorized work.
+The desired main-thread setting is GPT-6 Sol high. This is a task/session setting, not an automatic model switch: do not change global defaults or claim the active thread was switched by reading this skill. If the active setting differs, disclose the limitation and continue authorized work.
 
 The orchestrator handles ordinary design and decomposition itself. Astra medium is reserved for major architecture and last-resort rescue. Independent review uses GPT-6 Sol high. Do not automatically raise any configured reasoning effort.
 
@@ -70,9 +70,9 @@ Light flow:
 Use light flow only when scope is clear, blast radius and risk are low, no material architecture or product decision is needed, and completion can be mechanically verified.
 
 Standard flow:
-1. the GPT-6 Sol xhigh orchestrator performs targeted discovery, ordinary design, and bounded task decomposition;
-2. assign every clear implementation task to GPT-6 Luna max, using GPT-6 Sol high only for portions that cannot be safely decomposed;
-3. integrate, inspect the full diff, and run verification in the main thread;
+1. the GPT-6 Sol high orchestrator performs targeted discovery, ordinary design, and bounded task decomposition;
+2. assign bounded implementation, focused tests, and task-specific documentation to GPT-6 Luna max, using GPT-6 Sol high only for portions that cannot be safely decomposed;
+3. integrate, inspect the full diff, and run integration or final verification as described in section 7;
 4. deliver without a separate architect or reviewer when the evidence is sufficient;
 5. promote to major flow only when major-architecture criteria emerge.
 
@@ -102,9 +102,11 @@ Require a task DAG. Every task must include:
 If architect reports a material open decision, the orchestrator asks the user one question at a time. Otherwise continue automatically.
 
 ## 4. Model routing
-Main orchestrator and ordinary designer = GPT-6 Sol xhigh. Major architect = Astra medium. Default worker = GPT-6 Luna max. Complex worker = GPT-6 Sol high. Independent major-flow reviewer = GPT-6 Sol high in a fresh instance. Difficult rescue worker = Astra medium.
+Main orchestrator and ordinary designer = GPT-6 Sol high. Major architect = Astra medium. Default worker = GPT-6 Luna max. Complex worker = GPT-6 Sol high. Independent major-flow reviewer = GPT-6 Sol high in a fresh instance. Difficult rescue worker = Astra medium.
 
 Prefer Luna for every implementation task whose scope, contracts, and acceptance criteria are clear. Architectural complexity alone does not require a stronger implementation worker: clarify and split the design, then assign bounded tasks to Luna. Route individual tasks, not entire projects. Reserve the Sol high complex worker for high-coupling implementation that cannot be safely decomposed; keep independent straightforward portions with Luna. After Astra resolves a major design or difficult root cause, return remaining bounded implementation to Luna.
+
+The orchestrator owns design, task boundaries, cross-task integration, and final acceptance. Do not retain bounded production changes, test repairs, or task-specific documentation in the main thread merely because it is already inspecting those files; delegate them to Luna. The orchestrator may edit production code to resolve a concrete integration or contract conflict, and records why that work cannot be handed off cleanly. Before assigning implementation to Sol or Astra, record the specific non-decomposable risk or failure evidence; return clear remaining work to Luna.
 
 Do not route by keyword alone. Use actual scope, coupling, unknowns, blast radius, public-contract/data-model impact, security/concurrency/migration risk, and debugging difficulty. The router’s `complexity_escalators` are signals only.
 
@@ -132,11 +134,10 @@ For complex-worker implementation failures, first return concrete evidence for o
 Allow at most one automatic Astra invocation per task. A second Astra invocation requires materially new evidence and an explicit reason recorded by the orchestrator. If Astra was already used for major architecture, later rescue therefore needs new failure evidence. Astra reports unresolved blockers honestly instead of starting an endless retry cycle.
 
 ## 7. Integration and verification
-After workers finish, the orchestrator:
+Implementation workers run focused checks for their assigned scope and return the commands, results, and concise failure evidence. After dependent work is integrated, the orchestrator:
 - checks the full diff and unexpected changes;
-- runs applicable test/build/lint/typecheck commands;
-- verifies every acceptance criterion;
-- checks contract consistency across parallel tasks;
+- verifies every acceptance criterion and contract consistency across tasks;
+- runs required integration and full test/build/lint/typecheck checks at the milestone or final delivery, and repeats affected checks after material changes; do not rerun the full suite after every worker solely to duplicate a passing focused check;
 - records actual evidence, never claimed evidence.
 
 If verification fails, route the concrete evidence back to the responsible worker; do not rewrite the entire task by default.
@@ -148,12 +149,14 @@ For major flow, spawn a new configured GPT-6 Sol high reviewer (normally `polyfo
 - `fix-first` → route concrete findings to the best worker, re-verify, then use a fresh review again.
 - `rethink` → return to architect and rerun only affected tasks.
 
-Reviewer does not edit source. The orchestrator is responsible for running verification commands that require workspace writes.
+Reviewer does not edit source or run checks that write to the workspace. Workers run focused writable checks for their scope; the orchestrator runs required integration and final checks.
 
 ## 9. Durable project-context update
 Only after successful light or standard verification, or a major-flow `ship`, update project context. The orchestrator is the single writer.
 
 Store only durable facts: user-confirmed decisions, repo-verified architecture/contracts, stable commands, reusable conventions. Validate worker `context_candidates` before promoting them. Mark superseded facts stale. If nothing durable changed, do not write anything.
+
+For a long release, close work at reviewable milestones and keep the durable context current. When the user chooses to continue in a fresh task, use that context plus a concise verified handoff instead of replaying the old task's logs. Do not create or move a task solely because a milestone ended.
 
 ## 10. Final delivery
 Report concisely:

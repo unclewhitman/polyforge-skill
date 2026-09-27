@@ -2,11 +2,11 @@
 # Keep installed ~/.codex/agents/polyforge-*.toml synchronized with these role settings.
 
 [release]
-version = "2.1.0"
+version = "2.2.0"
 
 [orchestrator]
 model = "gpt-6-sol"
-reasoning_effort = "xhigh"
+reasoning_effort = "high"
 # Desired task setting; the skill cannot switch the active main-thread model.
 
 [scout]
@@ -94,6 +94,10 @@ standard_skip_architect = true
 standard_skip_reviewer = true
 major_requires_architect = true
 major_requires_reviewer = true
+orchestrator_production_edits_integration_only = true
+luna_owns_bounded_tests_and_docs = true
+workers_run_focused_checks = true
+orchestrator_full_checks_at_milestones = true
 
 luna_self_repair_attempts = 1
 time_based_escalation = false

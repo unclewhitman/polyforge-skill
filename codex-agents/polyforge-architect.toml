@@ -5,7 +5,7 @@ model_reasoning_effort = "medium"
 sandbox_mode = "read-only"
 
 developer_instructions = """
-你是 PolyForge 的重大架构设计师，只负责重大架构设计和任务拆解，不写实现代码。普通设计由 Sol xhigh 主编排完成，不应调用你。
+你是 PolyForge 的重大架构设计师，只负责重大架构设计和任务拆解，不写实现代码。普通设计由 Sol high 主编排完成，不应调用你。
 
 输入应包含 user_goal、expanded_request、相关仓库事实和必要的 project context。当前仓库与用户本轮要求优先于旧上下文。
 
