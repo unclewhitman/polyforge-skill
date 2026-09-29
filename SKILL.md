@@ -1,8 +1,8 @@
 ---
 name: polyforge
-description: "Orchestrate end-to-end coding from short or underspecified requests with cost-aware three-tier routing: GPT-6 Sol high for main orchestration, GPT-6 Luna max for most implementation, GPT-6 Sol high for complex implementation and independent review, and Astra medium only for major architecture and last-resort rescue. Use for feature work, bug fixes, refactors, and multi-step development where the user wants Codex to manage the workflow. Do not trigger for pure explanations or review-only questions unless implementation is requested."
+description: "Orchestrate end-to-end coding from short or underspecified requests with cost-aware routing: GPT-6 Sol high for orchestration, GPT-6 Luna max for routine implementation, GPT-5.6 Luna max for bounded moderate implementation, GPT-6 Sol high for complex implementation and review, and Astra medium for major architecture and difficult rescue. Use for feature work, bug fixes, refactors, and multi-step development where the user wants Codex to manage the workflow. Do not trigger for pure explanations or review-only questions unless implementation is requested."
 metadata:
-  version: "2.2.0"
+  version: "2.3.0"
   short-description: "Cost-aware coding orchestration with Luna-first implementation"
 ---
 
@@ -71,7 +71,7 @@ Use light flow only when scope is clear, blast radius and risk are low, no mater
 
 Standard flow:
 1. the GPT-6 Sol high orchestrator performs targeted discovery, ordinary design, and bounded task decomposition;
-2. assign bounded implementation, focused tests, and task-specific documentation to GPT-6 Luna max, using GPT-6 Sol high only for portions that cannot be safely decomposed;
+2. assign routine bounded implementation, focused tests, and task-specific documentation to GPT-6 Luna max; use GPT-5.6 Luna max for moderately difficult but well-bounded work, and GPT-6 Sol high only for portions that cannot be safely decomposed;
 3. integrate, inspect the full diff, and run integration or final verification as described in section 7;
 4. deliver without a separate architect or reviewer when the evidence is sufficient;
 5. promote to major flow only when major-architecture criteria emerge.
@@ -80,7 +80,7 @@ Use standard flow for substantive or multi-step work whose interfaces and risks 
 
 Major flow:
 1. spawn the configured Astra medium architect for a bounded design pass;
-2. implement the resulting task DAG with GPT-6 Luna max by default and GPT-6 Sol high where necessary;
+2. implement the resulting task DAG with GPT-6 Luna max by default, GPT-5.6 Luna max for moderately difficult bounded tasks, and GPT-6 Sol high where necessary;
 3. integrate and verify in the main thread;
 4. spawn a fresh GPT-6 Sol high reviewer;
 5. repair concrete findings, re-verify, and repeat review with a fresh reviewer only when changes materially affect the verdict.
@@ -102,9 +102,9 @@ Require a task DAG. Every task must include:
 If architect reports a material open decision, the orchestrator asks the user one question at a time. Otherwise continue automatically.
 
 ## 4. Model routing
-Main orchestrator and ordinary designer = GPT-6 Sol high. Major architect = Astra medium. Default worker = GPT-6 Luna max. Complex worker = GPT-6 Sol high. Independent major-flow reviewer = GPT-6 Sol high in a fresh instance. Difficult rescue worker = Astra medium.
+Main orchestrator and ordinary designer = GPT-6 Sol high. Major architect = Astra medium. Default worker = GPT-6 Luna max. Moderate worker = GPT-5.6 Luna max. Complex worker = GPT-6 Sol high. Independent major-flow reviewer = GPT-6 Sol high in a fresh instance. Difficult rescue worker = Astra medium.
 
-Prefer Luna for every implementation task whose scope, contracts, and acceptance criteria are clear. Architectural complexity alone does not require a stronger implementation worker: clarify and split the design, then assign bounded tasks to Luna. Route individual tasks, not entire projects. Reserve the Sol high complex worker for high-coupling implementation that cannot be safely decomposed; keep independent straightforward portions with Luna. After Astra resolves a major design or difficult root cause, return remaining bounded implementation to Luna.
+Prefer Luna for every implementation task whose scope, contracts, and acceptance criteria are clear. Use `default_worker` (`polyforge-luna`, GPT-6 Luna max) for routine or narrowly focused work. Use `moderate_worker` (`polyforge-luna56`, GPT-5.6 Luna max) directly when the task has several interacting components or nontrivial logic but its interfaces, risks, and acceptance checks are already clear. Do not use file count or keywords alone to make this choice. Architectural complexity alone does not require a stronger implementation worker: clarify and split the design, then assign bounded tasks to the appropriate Luna tier. Route individual tasks, not entire projects. Reserve the Sol high complex worker for high-coupling implementation that cannot be safely decomposed; keep independent straightforward portions with GPT-6 Luna. After Astra resolves a major design or difficult root cause, return remaining bounded implementation to a suitable Luna worker.
 
 The orchestrator owns design, task boundaries, cross-task integration, and final acceptance. Do not retain bounded production changes, test repairs, or task-specific documentation in the main thread merely because it is already inspecting those files; delegate them to Luna. The orchestrator may edit production code to resolve a concrete integration or contract conflict, and records why that work cannot be handed off cleanly. Before assigning implementation to Sol or Astra, record the specific non-decomposable risk or failure evidence; return clear remaining work to Luna.
 
@@ -120,12 +120,12 @@ Delegate independent tasks to subagents when useful. Parallel writes are allowed
 Never exceed `max_parallel_workers`. If Codex/session concurrency is lower or a spawn fails because capacity is exhausted, queue the remaining work serially rather than treating the task as failed. Wait for requested agents to finish before integrating dependent work.
 
 ## 6. Self-repair, escalation, and difficult rescue
-PolyForge imposes no time-based Luna cutoff. Do not interrupt, duplicate, or upgrade a Luna task merely because it has run a long time. Platform/user interruptions can still happen; if one occurs, preserve available state and resume from the handoff instead of assuming failure.
+PolyForge imposes no time-based Luna cutoff. Do not interrupt, duplicate, or upgrade either Luna worker merely because it has run a long time. Platform/user interruptions can still happen; if one occurs, preserve available state and resume from the handoff instead of assuming failure.
 
-If Luna fails acceptance:
+If either Luna worker fails acceptance:
 1. return the actual failure evidence to the same worker;
 2. allow the configured self-repair attempts (default 1);
-3. escalate to the Sol high complex worker only after repair still fails, the worker reports inability, repeated cycles show no effective progress, or newly discovered complexity exceeds the task boundary.
+3. if GPT-6 Luna still fails on a bounded task, hand off once to GPT-5.6 Luna max; if GPT-5.6 Luna still fails, escalate to the Sol high complex worker. Skip the intermediate tier only when new evidence shows the task is high-risk, cannot be safely decomposed, or the failure is a specification/architecture issue. Do not restart a failed task from scratch or bounce it between Luna workers.
 
 On every implementation escalation or return to Luna, send the structured handoff from `references/handoff.md`, including current_state, completed_work, changed_files, remaining_work, failure_evidence, and verification_history. The receiving worker continues from existing work unless evidence proves the direction is wrong.
 
@@ -169,6 +169,6 @@ Do not calculate or report dollar/token cost. PolyForge optimizes model use thro
 
 ## 11. Operational notes
 - Explicit invocation in Codex: `$polyforge ...` (or select it with `/skills`).
-- Custom agents are expected under `~/.codex/agents/`; keep their model settings synchronized with `config/model-router.toml`, including the Astra major architect, Sol complex worker and reviewer, and Astra rescue worker. Newly added or changed roles must be exposed by the session before use; if unavailable, use an explicitly configured general agent when supported, or disclose the limitation. Do not assume an already-loaded custom role has hot-reloaded.
+- Custom agents are expected under `~/.codex/agents/`; keep their model settings synchronized with `config/model-router.toml`, including both Luna workers, the Astra major architect, Sol complex worker and reviewer, and Astra rescue worker. Newly added or changed roles must be exposed by the session before use; if unavailable, use an explicitly configured general agent when supported, or disclose the limitation. Do not assume an already-loaded custom role has hot-reloaded.
 - Subagent permission behavior is still bounded by the parent Codex session. If a required action is denied, surface the real permission error rather than pretending the task failed logically.
 - Claude Code compatibility is retained as a secondary extension surface; Codex behavior is authoritative in this release.

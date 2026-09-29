@@ -2,7 +2,7 @@
 # Keep installed ~/.codex/agents/polyforge-*.toml synchronized with these role settings.
 
 [release]
-version = "2.2.0"
+version = "2.3.0"
 
 [orchestrator]
 model = "gpt-6-sol"
@@ -21,6 +21,11 @@ sandbox_mode = "read-only"
 
 [luna]
 model = "gpt-6-luna"
+reasoning_effort = "max"
+sandbox_mode = "workspace-write"
+
+[luna56]
+model = "gpt-5.6-luna"
 reasoning_effort = "max"
 sandbox_mode = "workspace-write"
 
@@ -77,6 +82,7 @@ store_temporary_debug_notes = false
 scout_agent = "polyforge-scout"
 architect_agent = "polyforge-architect"
 default_worker = "polyforge-luna"
+moderate_worker = "polyforge-luna56"
 complex_worker = "polyforge-complex"
 rescue_worker = "polyforge-astra"
 reviewer_agent = "polyforge-reviewer"
