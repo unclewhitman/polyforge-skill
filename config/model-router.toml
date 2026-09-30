@@ -1,11 +1,12 @@
 # PolyForge single source of truth for model roles and orchestration behavior.
-# Keep installed ~/.codex/agents/polyforge-*.toml synchronized with these role settings.
+# Run scripts/sync-config.py --sync-repo after changing role settings.
+# Run scripts/sync-config.py --install to install the skill and managed roles.
 
 [release]
-version = "2.3.0"
+version = "2.4.2"
 
 [orchestrator]
-model = "gpt-6-sol"
+model = "gpt-6.1-sol"
 reasoning_effort = "high"
 # Desired task setting; the skill cannot switch the active main-thread model.
 
@@ -24,18 +25,23 @@ model = "gpt-6-luna"
 reasoning_effort = "max"
 sandbox_mode = "workspace-write"
 
-[luna56]
-model = "gpt-5.6-luna"
-reasoning_effort = "max"
-sandbox_mode = "workspace-write"
-
 [complex]
-model = "gpt-6-sol"
+model = "gpt-6.1-sol"
 reasoning_effort = "high"
 sandbox_mode = "workspace-write"
 
+[refiner]
+model = "gpt-6.1-sol"
+reasoning_effort = "xhigh"
+sandbox_mode = "read-only"
+
+[major_worker]
+model = "gpt-6.1-sol"
+reasoning_effort = "xhigh"
+sandbox_mode = "workspace-write"
+
 [reviewer]
-model = "gpt-6-sol"
+model = "gpt-6.1-sol"
 reasoning_effort = "high"
 sandbox_mode = "read-only"
 
@@ -82,8 +88,9 @@ store_temporary_debug_notes = false
 scout_agent = "polyforge-scout"
 architect_agent = "polyforge-architect"
 default_worker = "polyforge-luna"
-moderate_worker = "polyforge-luna56"
 complex_worker = "polyforge-complex"
+followup_architect_agent = "polyforge-refiner"
+major_complex_worker = "polyforge-major-worker"
 rescue_worker = "polyforge-astra"
 reviewer_agent = "polyforge-reviewer"
 
@@ -100,12 +107,24 @@ standard_skip_architect = true
 standard_skip_reviewer = true
 major_requires_architect = true
 major_requires_reviewer = true
-orchestrator_production_edits_integration_only = true
+orchestrator_production_edits_integration_only = false
+# Main-thread production edits remain restricted to integration conflicts or micro edits.
+orchestrator_production_edits_allowed = ["integration-conflict", "verified-low-risk-micro-edit"]
+micro_edits_main_thread_enabled = true
+micro_edits_require_clear_scope = true
+micro_edits_require_low_risk = true
+micro_edits_require_quick_verification = true
 luna_owns_bounded_tests_and_docs = true
 workers_run_focused_checks = true
 orchestrator_full_checks_at_milestones = true
 
 luna_self_repair_attempts = 1
+complex_self_repair_attempts = 1
+escalation_chain = ["polyforge-luna", "polyforge-complex", "polyforge-astra"]
+major_escalation_chain = ["polyforge-luna", "polyforge-major-worker", "polyforge-astra"]
+major_initial_design_requires_astra = true
+major_followup_requires_astra_baseline = true
+major_fundamental_redesign_requires_astra = true
 time_based_escalation = false
 max_automatic_astra_invocations = 1
 second_astra_requires_new_evidence = true
@@ -142,3 +161,24 @@ stall_signals = [
   "发现超出原规格的复杂依赖或高风险实现",
   "需要复杂架构决策而当前规格不足"
 ]
+
+# Role bindings are consumed by the sync/validation script.
+[roles]
+polyforge-scout = "scout"
+polyforge-architect = "architect"
+polyforge-luna = "luna"
+polyforge-complex = "complex"
+polyforge-refiner = "refiner"
+polyforge-major-worker = "major_worker"
+polyforge-reviewer = "reviewer"
+polyforge-astra = "astra"
+
+# Offline allowlist used by this release, not a live account availability check.
+[model_support]
+"gpt-6.1-sol" = ["low", "medium", "high", "xhigh", "max"]
+"gpt-6-luna" = ["none", "low", "medium", "high", "xhigh", "max"]
+"gpt-6-astra" = ["low", "medium", "high", "xhigh", "max"]
+
+[retired]
+# Only these known installation files are backed up and removed on --install.
+role_files = ["polyforge-luna56.toml"]

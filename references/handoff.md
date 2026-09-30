@@ -1,6 +1,6 @@
 # PolyForge structured handoff
 
-Use for every implementation delegation and escalation (GPT-6 Luna → GPT-5.6 Luna → Sol complex worker → Astra), and for returning bounded work to a Luna worker. Skip a tier when the routing evidence warrants it.
+Use for every implementation delegation and escalation (GPT-6 Luna → GPT-6.1 Sol high → Astra medium; major complex work with an Astra baseline uses GPT-6.1 Sol xhigh instead of high), and for returning bounded work to Luna.
 
 ```yaml
 task_id: T1
@@ -8,6 +8,9 @@ goal: "Exact deliverable"
 user_goal: "Original user goal"
 assumptions: []
 relevant_project_context: []
+workflow_level: standard # light | standard | major
+astra_design_baseline: null # required for major follow-up design / complex implementation
+design_delta: []
 
 depends_on: []
 parallel_safe: true

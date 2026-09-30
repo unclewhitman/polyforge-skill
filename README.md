@@ -1,23 +1,38 @@
 # PolyForge
 
-PolyForge v2.3.0 is a Codex skill for taking a coding request from repository discovery through implementation and verification. It uses light, standard, and major workflows to keep model use proportional to the task.
+PolyForge v2.4.2 takes coding requests from targeted discovery through implementation and verification. Light, standard and major workflows keep model use proportional to risk. Clear, low-risk micro edits with quick observable verification may be completed by the main thread.
 
 | Role | Model and reasoning |
 | --- | --- |
-| Main orchestrator and ordinary design | GPT-6 Sol `high` |
+| Main orchestrator and ordinary design | GPT-6.1 Sol `high` |
 | Repository scout | GPT-6 Luna `medium` |
-| Default implementation | GPT-6 Luna `max` |
-| Moderately difficult bounded implementation | GPT-5.6 Luna `max` |
-| Complex implementation | GPT-6 Sol `high` |
-| Independent major-flow review | GPT-6 Sol `high` |
-| Major architecture and last-resort rescue | GPT-6 Astra `medium` |
+| Default bounded implementation | GPT-6 Luna `max` |
+| Ordinary complex implementation | GPT-6.1 Sol `high` |
+| Independent major-flow review | GPT-6.1 Sol `high` |
+| First major design | GPT-6 Astra `medium`, required |
+| Local follow-up major design | GPT-6.1 Sol `xhigh`, read-only |
+| Major complex implementation after Astra design | GPT-6.1 Sol `xhigh`, workspace-write |
+| Difficult rescue / fundamental major redesign | GPT-6 Astra `medium` |
 
-## Install in Codex
+Clear implementation remains with Luna even in major work. The two new xhigh roles require a confirmed Astra design baseline and cannot replace the first design. A new major scope or fundamental change to critical invariants returns to Astra.
 
-1. Clone this repository into `~/.codex/skills/polyforge` (or `$CODEX_HOME/skills/polyforge` if `CODEX_HOME` is set).
-2. Copy the seven TOML files from `codex-agents/` into `~/.codex/agents/` (or `$CODEX_HOME/agents/`). They are custom agent definitions; keeping them only inside the skill directory does not register those roles.
-3. Start a new Codex task using GPT-6 Sol with `high` reasoning and invoke `$polyforge`. The skill cannot change the main task's model itself. For an existing task, change its model setting separately; active work is not switched by updating the skill. Restart or reload Codex after installing or updating custom agents.
+Default escalation is Luna → one evidence-based self-repair → Sol → one focused self-repair → Astra for the smallest difficult scope. Ordinary work uses Sol high; major complex work with an Astra baseline uses Sol xhigh. Time alone is not a failure.
 
-`config/model-router.toml` records the role settings and routing gates. Keep it synchronized with the installed custom agent TOML files. PolyForge uses GPT-6 Luna for routine bounded work and GPT-5.6 Luna for bounded tasks with moderately difficult logic or interactions. A GPT-6 Luna task that still fails after one evidence-based repair passes once to GPT-5.6 Luna before Sol, unless new risk warrants skipping that tier. The orchestrator integrates and runs required milestone/final checks. Astra remains limited to demonstrated major architecture or difficult rescue, with at most one automatic invocation per task.
+## Check and install
 
-The `scripts/init-project-context.ps1` and `scripts/init-project-context.sh` helpers create a project-local context file when the skill needs one. They are run from the target project, not from this repository.
+Use Python 3.11+; no third-party packages are required. From this repository or the unpacked release folder:
+
+```text
+python scripts/sync-config.py --check
+python scripts/sync-config.py --install --dry-run
+python scripts/sync-config.py --install
+python scripts/sync-config.py --check-installed
+```
+
+Installation copies the skill into `$CODEX_HOME/skills/polyforge` and eight managed roles into `$CODEX_HOME/agents`, using `~/.codex` when CODEX_HOME is unset. Changed existing files are backed up. User config.toml, global defaults and unrelated agents are preserved. Retired PolyForge role files are backed up before removal. No installation occurs unless --install is supplied.
+
+Start a new/reloaded Codex session after installing roles. Choose GPT-6.1 Sol high for the main task, then invoke `$polyforge`. The skill cannot switch the active main-thread model, and installing files does not hot-reload exposed roles.
+
+After editing config/model-router.toml, run `python scripts/sync-config.py --sync-repo`, review role-file changes and install. Descriptions and developer instructions remain hand-authored and must stay semantically consistent. Offline validation does not prove live account access or client support.
+
+See [configuration and backups](references/configuration.md). Project-context initializers remain under scripts/init-project-context.ps1 and scripts/init-project-context.sh and run from the target project.

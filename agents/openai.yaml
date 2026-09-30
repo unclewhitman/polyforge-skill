@@ -1,6 +1,6 @@
 interface:
   display_name: "PolyForge"
-  short_description: "Cost-aware coding orchestration with two Luna implementation tiers"
-  default_prompt: "Take this development request end to end using PolyForge's light, standard, or major flow; prefer Luna for implementation, reserve Astra for major architecture or last-resort rescue, verify the result, and deliver it."
+  short_description: "Coding orchestration with Astra design and Sol follow-through"
+  default_prompt: "Use $polyforge to complete this development request: use Astra for initial major design, GPT-6.1 Sol xhigh for major follow-ups, Luna for bounded implementation, and verify the result."
 policy:
   allow_implicit_invocation: true
