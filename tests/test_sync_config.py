@@ -38,8 +38,11 @@ class SyncConfigTests(unittest.TestCase):
         cfg = self.cfg()
         sync.check_repo(self.root, cfg)
         self.assertEqual(cfg['architect']['model'], 'gpt-6-astra')
-        self.assertEqual(cfg['architect']['reasoning_effort'], 'medium')
-        for role in ('orchestrator', 'complex', 'reviewer'):
+        self.assertEqual(cfg['architect']['reasoning_effort'], 'high')
+        self.assertEqual(cfg['astra']['reasoning_effort'], 'high')
+        for role in ('orchestrator', 'refiner', 'major_worker'):
+            self.assertEqual((cfg[role]['model'], cfg[role]['reasoning_effort']), ('gpt-6.1-sol', 'max'))
+        for role in ('complex', 'reviewer'):
             self.assertEqual((cfg[role]['model'], cfg[role]['reasoning_effort']), ('gpt-6.1-sol', 'high'))
         self.assertEqual(cfg['luna']['reasoning_effort'], 'max')
         self.assertEqual(cfg['scout']['reasoning_effort'], 'medium')
@@ -63,7 +66,8 @@ class SyncConfigTests(unittest.TestCase):
         self.assertEqual(before, self.snapshot(self.root))
 
     def test_sol_none_is_rejected(self):
-        self.change_router('reasoning_effort = "high"', 'reasoning_effort = "none"')
+        self.change_router('[orchestrator]\nmodel = "gpt-6.1-sol"\nreasoning_effort = "max"',
+                           '[orchestrator]\nmodel = "gpt-6.1-sol"\nreasoning_effort = "none"')
         with self.assertRaisesRegex(sync.ConfigError, 'Unsupported offline'):
             self.cfg()
 
@@ -115,10 +119,10 @@ class SyncConfigTests(unittest.TestCase):
         with self.assertRaisesRegex(sync.ConfigError, 'architect_agent must use Astra'):
             self.cfg()
 
-    def test_major_followup_xhigh_cannot_silently_downgrade(self):
-        self.change_router('[refiner]\nmodel = "gpt-6.1-sol"\nreasoning_effort = "xhigh"',
+    def test_major_followup_max_cannot_silently_downgrade(self):
+        self.change_router('[refiner]\nmodel = "gpt-6.1-sol"\nreasoning_effort = "max"',
                            '[refiner]\nmodel = "gpt-6.1-sol"\nreasoning_effort = "high"')
-        with self.assertRaisesRegex(sync.ConfigError, 'must use GPT-6.1 Sol xhigh'):
+        with self.assertRaisesRegex(sync.ConfigError, 'must use GPT-6.1 Sol max'):
             self.cfg()
 
     def test_micro_edit_safety_gate_required(self):

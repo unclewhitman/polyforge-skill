@@ -1,8 +1,8 @@
 ---
 name: polyforge
-description: "Orchestrate coding requests through discovery, proportional model routing, safe implementation and verification. Use GPT-6.1 Sol high for orchestration, Luna max for bounded work, Astra medium for initial major design, and GPT-6.1 Sol xhigh for major follow-ups. Use for feature work, bug fixes, refactors and multi-step development; do not trigger for explanation or review-only requests unless implementation is requested."
+description: "Orchestrate coding requests through discovery, proportional model routing, safe implementation and verification. Use GPT-6.1 Sol max for orchestration, Luna max for bounded work, Astra high for initial major design, and GPT-6.1 Sol max for major follow-ups. Use for feature work, bug fixes, refactors and multi-step development; do not trigger for explanation or review-only requests unless implementation is requested."
 metadata:
-  version: "2.4.2"
+  version: "2.4.3"
   short-description: "Astra initial design, Sol follow-through and bounded Luna work"
 ---
 
@@ -15,9 +15,9 @@ Turn a short user goal into a verified code delivery:
 ## 0. Runtime configuration
 Read `config/model-router.toml` at the start. It is the source for role bindings, model settings and routing gates. Custom agent TOML files are executable definitions, not automatically updated by reading the router. Run `python scripts/sync-config.py --check` from the skill folder when a Python 3.11+ runtime is available; use `--check-installed` when installation drift is relevant. Otherwise compare the selected role's model, effort and sandbox manually. Resolve relevant drift before spawning that role; missing or unavailable configuration must be disclosed, never silently replaced.
 
-The main thread owns communication, approved requirements, task state, dependencies, spawning, integration, verification, project context and delivery. Its desired task/session setting is GPT-6.1 Sol high. The skill cannot switch the active thread or global defaults. If it differs, disclose the limitation and continue authorized work; do not claim a switch occurred.
+The main thread owns communication, approved requirements, task state, dependencies, spawning, integration, verification, project context and delivery. Its desired task/session setting is GPT-6.1 Sol max. The skill cannot switch the active thread or global defaults. If it differs, disclose the limitation and continue authorized work; do not claim a switch occurred.
 
-Existing Sol roles retain high. Initial major architecture and difficult rescue retain Astra medium. New major follow-up design and complex implementation roles explicitly use GPT-6.1 Sol xhigh; do not raise the orchestrator, ordinary complex worker or reviewer to xhigh. Clear implementation remains with GPT-6 Luna max.
+Main orchestration and ordinary design use GPT-6.1 Sol max. Ordinary complex implementation and independent review retain GPT-6.1 Sol high. Initial major architecture and difficult rescue use Astra high. Major follow-up design and complex implementation use GPT-6.1 Sol max under an approved Astra baseline. Do not automatically raise any configured reasoning effort. Clear implementation remains with GPT-6 Luna max.
 
 ## 1. Project context and short-prompt understanding
 If project context is enabled, locate the configured file (default `.polyforge/project-context.md`). If absent and auto-create is enabled, run the platform-appropriate initializer: `scripts/init-project-context.ps1` on PowerShell/Windows or `scripts/init-project-context.sh` on Bash/macOS/Linux/WSL. Load only entries relevant to the current task.
@@ -67,21 +67,21 @@ Light flow:
 4. deliver without a separate architect or reviewer when the evidence is sufficient.
 
 Standard flow:
-1. the GPT-6.1 Sol high orchestrator performs targeted discovery, ordinary design and bounded decomposition;
+1. the GPT-6.1 Sol max orchestrator performs targeted discovery, ordinary design and bounded decomposition;
 2. use GPT-6 Luna max for clear tasks; use GPT-6.1 Sol high for implementation that cannot safely be decomposed or for an evidence-based escalation;
 3. integrate, inspect the full diff and run milestone/final verification;
 4. deliver without a separate architect or reviewer unless the user or repository rules require one;
 5. promote to major when material major-architecture criteria emerge.
 
 Major flow:
-1. the first major design must be performed by `architect_agent` (Astra medium), even if the orchestrator believes it could design it itself;
+1. the first major design must be performed by `architect_agent` (Astra high), even if the orchestrator believes it could design it itself;
 2. confirm a concise `astra_design_baseline` containing the approved scope, design summary, contracts, critical invariants, risks, open decisions and verification plan;
-3. assign clear implementation to GPT-6 Luna max; route non-decomposable major complex implementation and relevant escalations to `major_complex_worker` (GPT-6.1 Sol xhigh);
-4. for subsequent local design changes within that baseline, use `followup_architect_agent` (GPT-6.1 Sol xhigh, read-only); do not rerun the full initial design unnecessarily;
+3. assign clear implementation to GPT-6 Luna max; route non-decomposable major complex implementation and relevant escalations to `major_complex_worker` (GPT-6.1 Sol max);
+4. for subsequent local design changes within that baseline, use `followup_architect_agent` (GPT-6.1 Sol max, read-only); do not rerun the full initial design unnecessarily;
 5. integrate, verify and obtain a fresh GPT-6.1 Sol high review;
 6. repair concrete findings and rerun affected checks; rereview when changes materially affect the verdict.
 
-Follow-up xhigh roles require an actual confirmed Astra baseline. A task is not a follow-up merely because the user says "change it again". A new major goal, fundamental design replacement, critical invariant/security boundary/migration strategy change, or evidence invalidating the baseline requires a new Astra design pass. Preserve the existing Astra invocation gate: a second invocation in the same task needs materially new evidence and a recorded reason.
+Follow-up max roles require an actual confirmed Astra baseline. A task is not a follow-up merely because the user says "change it again". A new major goal, fundamental design replacement, critical invariant/security boundary/migration strategy change, or evidence invalidating the baseline requires a new Astra design pass. Preserve the existing Astra invocation gate: a second invocation in the same task needs materially new evidence and a recorded reason.
 
 ## 3. Major-architecture design
 Ordinary design remains with the orchestrator. Major design is demonstrated by at least one material condition:
@@ -92,9 +92,9 @@ Ordinary design remains with the orchestrator. Major design is demonstrated by a
 - replacement of a core architecture across modules;
 - material design uncertainty unresolved by the orchestrator's repository evidence.
 
-The first design for each major scope must use Astra medium. Pass the approved expanded request and relevant evidence to the read-only architect. After confirmation, carry the concise `astra_design_baseline` through handoffs; it contains reviewable facts and decisions, not hidden reasoning. A prior successful baseline may be reused only after verifying its relevance against current repository facts and user requirements.
+The first design for each major scope must use Astra high. Pass the approved expanded request and relevant evidence to the read-only architect. After confirmation, carry the concise `astra_design_baseline` through handoffs; it contains reviewable facts and decisions, not hidden reasoning. A prior successful baseline may be reused only after verifying its relevance against current repository facts and user requirements.
 
-Use the read-only GPT-6.1 Sol xhigh refiner for local follow-up changes preserving the approved critical boundaries and invariants. Require a `design_delta`, preserved invariants, affected tasks and verification changes. Missing baseline returns to initial Astra design. Fundamental redesign returns to Astra, with the real new evidence; permission/dependency problems do not justify model escalation.
+Use the read-only GPT-6.1 Sol max refiner for local follow-up changes preserving the approved critical boundaries and invariants. Require a `design_delta`, preserved invariants, affected tasks and verification changes. Missing baseline returns to initial Astra design. Fundamental redesign returns to Astra, with the real new evidence; permission/dependency problems do not justify model escalation.
 
 Require a task DAG. Every task must include:
 `task_id, goal, depends_on, in_scope_files_or_systems, forbidden_changes, interface_contracts, acceptance_criteria, verification_commands, complexity, complexity_reason, parallel_safe, conflict_scope, open_decisions`.
@@ -102,7 +102,7 @@ Require a task DAG. Every task must include:
 If a material user decision is missing, ask the highest-impact question and continue independent work. Otherwise proceed automatically.
 
 ## 4. Model routing
-Main orchestrator and ordinary design = GPT-6.1 Sol high. Initial major architect = Astra medium. Default worker = GPT-6 Luna max. Ordinary complex worker = GPT-6.1 Sol high. Major follow-up designer and complex worker = GPT-6.1 Sol xhigh. Fresh major reviewer = GPT-6.1 Sol high. Difficult rescue = Astra medium.
+Main orchestrator and ordinary design = GPT-6.1 Sol max. Initial major architect = Astra high. Default worker = GPT-6 Luna max. Ordinary complex worker = GPT-6.1 Sol high. Major follow-up designer and complex worker = GPT-6.1 Sol max. Fresh major reviewer = GPT-6.1 Sol high. Difficult rescue = Astra high.
 
 Route individual tasks by scope, coupling, unknowns, blast radius, contracts, security/concurrency/migration risk and debugging evidence. Clarify contracts and split safely before choosing a stronger implementation worker. Clear implementation, including clear portions of major work, remains with Luna. Record the concrete non-decomposable risk or failure evidence before selecting Sol or Astra. After resolving a difficult scope, return bounded remaining implementation to Luna.
 
@@ -122,11 +122,11 @@ Do not interrupt, duplicate or upgrade a worker merely because it has run a long
 
 Grade difficult work by evidence without adding mandatory rescue roles. A local implementation failure stays with the current worker for its focused repair; cross-module or unknown-root-cause failures use the appropriate Sol worker; unresolved fundamental design or demonstrated capability failures use Astra. Permission, dependency and missing user-decision blockers are resolved directly rather than passed through stronger models. These are routing decisions, not a requirement to run every level.
 
-Default escalation: GPT-6 Luna → GPT-6.1 Sol high → Astra medium. For major complex work under an approved Astra baseline, use GPT-6.1 Sol xhigh in place of Sol high; do not add high then xhigh as two mandatory steps.
+Default escalation: GPT-6 Luna → GPT-6.1 Sol high → Astra high. For major complex work under an approved Astra baseline, use GPT-6.1 Sol max in place of Sol high; do not add high then max as two mandatory steps.
 
 When a Luna worker fails acceptance, return actual failure evidence to that same worker for the configured self-repair attempt (default one). If still failing, continue from existing work with the appropriate Sol worker. Skip Luna when new evidence already establishes non-decomposable/high-risk implementation; do not force a predictable failure first. No intermediate worker tier is inserted automatically.
 
-The selected Sol worker gets one focused evidence-based self-repair attempt. If that still fails, progress demonstrably stalls or the scope exceeds its capability, send only the smallest difficult scope to Astra medium. Ordinary specification gaps return to the orchestrator; local major design gaps go to the xhigh refiner; fundamental major design errors return to Astra. Missing permissions, dependencies or required user decisions are blockers, not capability failures.
+The selected Sol worker gets one focused evidence-based self-repair attempt. If that still fails, progress demonstrably stalls or the scope exceeds its capability, send only the smallest difficult scope to Astra high. Ordinary specification gaps return to the orchestrator; local major design gaps go to the max refiner; fundamental major design errors return to Astra. Missing permissions, dependencies or required user decisions are blockers, not capability failures.
 
 Use `references/handoff.md` for every implementation escalation or return to Luna, including current_state, completed_work, changed_files, remaining_work, failure_evidence and verification_history; include the Astra baseline for major follow-up roles. Continue from existing correct work instead of restarting or bouncing between workers.
 
@@ -146,7 +146,7 @@ For major flow, spawn a new configured GPT-6.1 Sol high reviewer (normally `poly
 
 - `ship` → deliver.
 - `fix-first` → route concrete findings to the best worker, re-verify, then use a fresh review again.
-- `rethink` → use the xhigh refiner for a local baseline-preserving design correction; return to Astra for fundamental redesign, with new evidence and a recorded reason. Rerun only affected tasks.
+- `rethink` → use the max refiner for a local baseline-preserving design correction; return to Astra for fundamental redesign, with new evidence and a recorded reason. Rerun only affected tasks.
 
 Reviewer does not edit source or run checks that write to the workspace. Workers run focused writable checks for their scope; the orchestrator runs required integration and final checks.
 
@@ -169,6 +169,6 @@ Do not calculate or report dollar/token cost unless the user explicitly asks. Po
 ## 11. Operational notes
 - Invoke with `$polyforge ...` or select it with `/skills`.
 - For installation, synchronization, offline validation and backup behavior, read `references/configuration.md`. The sync script installs the skill and eight managed role files without changing user `config.toml`, global defaults or unrelated roles. It does not check live account model access or client support.
-- Newly installed or changed roles must be exposed by a new/reloaded session before use. Do not assume hot reload. If a selected role is missing, use a general agent with the exact model, effort and sandbox only when the session supports it; otherwise disclose the limitation. Never substitute Sol high for the configured xhigh role silently.
+- Newly installed or changed roles must be exposed by a new/reloaded session before use. Do not assume hot reload. If a selected role is missing, use a general agent with the exact model, effort and sandbox only when the session supports it; otherwise disclose the limitation. Never substitute Sol high for the configured max role silently.
 - Preserve parent permission boundaries and report the real permission error.
 - Codex behavior is authoritative; Claude Code compatibility remains a secondary extension surface.

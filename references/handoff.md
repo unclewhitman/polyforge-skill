@@ -1,6 +1,6 @@
 # PolyForge structured handoff
 
-Use for every implementation delegation and escalation (GPT-6 Luna → GPT-6.1 Sol high → Astra medium; major complex work with an Astra baseline uses GPT-6.1 Sol xhigh instead of high), and for returning bounded work to Luna.
+Use for every implementation delegation and escalation (GPT-6 Luna → GPT-6.1 Sol high → Astra high; major complex work with an Astra baseline uses GPT-6.1 Sol max instead of high), and for returning bounded work to Luna.
 
 ```yaml
 task_id: T1

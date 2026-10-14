@@ -9,7 +9,7 @@ python scripts/sync-config.py --check
 python scripts/sync-config.py --sync-repo
 ```
 
---check is the default and writes nothing. It checks TOML syntax, all role bindings, offline model/effort support, model/effort/sandbox drift, route references, direct escalation chains, mandatory Astra/xhigh boundaries. SKILL and README versions must match the router.
+--check is the default and writes nothing. It checks TOML syntax, all role bindings, offline model/effort support, model/effort/sandbox drift, route references, direct escalation chains, mandatory Astra/max boundaries. SKILL and README versions must match the router.
 
 --sync-repo updates only role name, model, model_reasoning_effort and sandbox_mode from the router, preserving descriptions, instructions and other content. All templates and destinations are validated before writes. Edit prose manually when behavior changes. Unknown models require a verified addition to model_support before use. The allowlist is a release snapshot; it does not check live account access or client support.
 
@@ -29,4 +29,4 @@ The retired `polyforge-luna56.toml` is removed only from `agents/` and `skills/p
 
 --check-installed compares both the installed package and managed roles to this release, without reading user config.toml or credentials. It is read-only. Installation to a restricted location remains subject to normal session permissions.
 
-Start a new/reloaded session to expose changed roles. Choose GPT-6.1 Sol high for the main task separately; installation does not switch or hot-reload an active task.
+Start a new/reloaded session to expose changed roles. Choose GPT-6.1 Sol max for the main task separately; installation does not switch or hot-reload an active task.
