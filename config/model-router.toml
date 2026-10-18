@@ -3,11 +3,11 @@
 # Run scripts/sync-config.py --install to install the skill and managed roles.
 
 [release]
-version = "2.4.3"
+version = "2.4.4"
 
 [orchestrator]
 model = "gpt-6.1-sol"
-reasoning_effort = "max"
+reasoning_effort = "high"
 # Desired task setting; the skill cannot switch the active main-thread model.
 
 [scout]
@@ -32,7 +32,7 @@ sandbox_mode = "workspace-write"
 
 [refiner]
 model = "gpt-6.1-sol"
-reasoning_effort = "max"
+reasoning_effort = "high"
 sandbox_mode = "read-only"
 
 [major_worker]

@@ -117,10 +117,10 @@ def load_config(root: Path) -> dict:
     for key in ('architect_agent', 'rescue_worker'):
         if cfg[roles[router[key]]]['model'] != 'gpt-6-astra':
             raise ConfigError(f'{key} must use Astra')
-    for key in ('followup_architect_agent', 'major_complex_worker'):
+    for key, effort in (('followup_architect_agent', 'high'), ('major_complex_worker', 'max')):
         role = cfg[roles[router[key]]]
-        if (role['model'], role['reasoning_effort']) != ('gpt-6.1-sol', 'max'):
-            raise ConfigError(f'{key} must use GPT-6.1 Sol max')
+        if (role['model'], role['reasoning_effort']) != ('gpt-6.1-sol', effort):
+            raise ConfigError(f'{key} must use GPT-6.1 Sol {effort}')
     for key in ('scout_agent', 'architect_agent', 'followup_architect_agent', 'reviewer_agent'):
         if cfg[roles[router[key]]]['sandbox_mode'] != 'read-only':
             raise ConfigError(f'{key} must remain read-only')
@@ -309,7 +309,7 @@ def main(argv=None) -> int:
                 count, backup = install(root, cfg, home, args.dry_run)
                 if not args.dry_run:
                     print(f'Installed/updated/retired {count} file(s). Backup: {backup or "not needed"}')
-                    print('Start a new/reloaded session; select GPT-6.1 Sol max for the main task separately.')
+                    print('Start a new/reloaded session; select GPT-6.1 Sol high for the main task separately.')
             elif args.check_installed:
                 check_installed(root, cfg, home)
                 print('Installed package and roles match this release.')
