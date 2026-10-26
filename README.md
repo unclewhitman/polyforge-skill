@@ -1,6 +1,6 @@
 # PolyForge
 
-PolyForge v3.0.0 prioritizes completing the user's development requirements with a short loop:
+PolyForge v3.1.0 prioritizes completing the user's development requirements with a short loop:
 
 `understand → implement → verify affected behavior → deliver`
 
@@ -10,21 +10,21 @@ Verification follows the change: use focused checks, reuse still-valid results, 
 
 ## Model routing
 
-This release keeps the v2.4.4 model bindings, reasoning efforts and escalation order unchanged. Model-routing changes are separate from this workflow simplification.
+Choose assistance by the actual work. The main task remains Sol high; six optional helpers cover focused discovery, bounded work, difficult implementation, design, review and rescue.
 
 | Optional role | Model and reasoning |
 | --- | --- |
 | Main task preference | GPT-6.1 Sol `high` |
-| Repository scout | GPT-6 Luna `medium` |
+| Repository scout | GPT-6 Luna `high` |
 | Bounded implementation helper | GPT-6 Luna `max` |
-| Ordinary complex helper | GPT-6.1 Sol `high` |
+| Complex implementation helper | GPT-6.1 Sol `xhigh` |
 | Independent reviewer | GPT-6.1 Sol `high` |
-| Initial major design | GPT-6 Astra `high` |
-| Follow-up major design under an Astra baseline | GPT-6.1 Sol `high` |
-| Major complex implementation under an Astra baseline | GPT-6.1 Sol `max` |
-| Difficult rescue | GPT-6 Astra `high` |
+| Read-only architecture consultant | GPT-6 Astra `xhigh` |
+| Difficult implementation rescue | GPT-6 Astra `xhigh` |
 
-When helpers are needed, existing escalation remains Luna → Sol → Astra, preserving correct work and real failure evidence. A genuine major-architecture design still uses the Astra-first baseline and existing follow-up role boundaries. These roles are available tools, not a required sequence for every request. The skill cannot switch the active main-thread model.
+Ordinary work stays in the main thread. Clear independent tasks can use Luna max. Sol xhigh is reserved for tightly coupled cross-module changes, concurrency/transactions, difficult bugs and contract-heavy refactors. Astra xhigh handles consequential unresolved design questions or difficult implementation rescue; its read-only and writable roles remain separate.
+
+Select a suitable helper directly without traversing a fixed Luna → Sol → Astra ladder. Existing workable designs need no preliminary Astra pass or named baseline. The current owner can finish the remaining work without a forced return to Luna. Local design refinement stays with the main thread, and the old major worker is merged into the complex helper. The skill cannot switch the active main-thread model or silently change a configured role's effort.
 
 ## Install or update
 
@@ -34,7 +34,7 @@ Use Python 3.11+; no third-party packages are needed. From this repository or an
 python scripts/sync-config.py --install
 ```
 
-Installation validates the package, copies the skill and eight managed roles, and backs up changed existing files. It preserves user config.toml, global defaults and unrelated roles. Unchanged installations write nothing.
+Installation validates the package, copies the skill and six managed roles, and backs up changed existing files. On upgrade, retired PolyForge refiner and major-worker role files are backed up before removal. It preserves user config.toml, global defaults and unrelated roles. Unchanged installations write nothing.
 
 Start a new/reloaded Codex session after updating so old skill and role instructions are replaced, then invoke `$polyforge`. Ordinary development does not require running an installation check before each task.
 

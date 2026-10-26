@@ -3,20 +3,15 @@
 # Run scripts/sync-config.py --install to install the skill and managed roles.
 
 [release]
-version = "3.0.0"
+version = "3.1.0"
 
 [orchestrator]
 model = "gpt-6.1-sol"
 reasoning_effort = "high"
-# Desired task setting; the skill cannot switch the active main-thread model.
+# Desired main-task setting; the skill cannot switch the active main thread.
 
 [scout]
 model = "gpt-6-luna"
-reasoning_effort = "medium"
-sandbox_mode = "read-only"
-
-[architect]
-model = "gpt-6-astra"
 reasoning_effort = "high"
 sandbox_mode = "read-only"
 
@@ -27,18 +22,13 @@ sandbox_mode = "workspace-write"
 
 [complex]
 model = "gpt-6.1-sol"
-reasoning_effort = "high"
+reasoning_effort = "xhigh"
 sandbox_mode = "workspace-write"
 
-[refiner]
-model = "gpt-6.1-sol"
-reasoning_effort = "high"
+[architect]
+model = "gpt-6-astra"
+reasoning_effort = "xhigh"
 sandbox_mode = "read-only"
-
-[major_worker]
-model = "gpt-6.1-sol"
-reasoning_effort = "max"
-sandbox_mode = "workspace-write"
 
 [reviewer]
 model = "gpt-6.1-sol"
@@ -47,7 +37,7 @@ sandbox_mode = "read-only"
 
 [astra]
 model = "gpt-6-astra"
-reasoning_effort = "high"
+reasoning_effort = "xhigh"
 sandbox_mode = "workspace-write"
 
 [project_context]
@@ -61,83 +51,30 @@ exclude_from_git = true
 
 [router]
 scout_agent = "polyforge-scout"
-architect_agent = "polyforge-architect"
-default_worker = "polyforge-luna"
+bounded_worker = "polyforge-luna"
 complex_worker = "polyforge-complex"
-followup_architect_agent = "polyforge-refiner"
-major_complex_worker = "polyforge-major-worker"
+architect_agent = "polyforge-architect"
 rescue_worker = "polyforge-astra"
 reviewer_agent = "polyforge-reviewer"
-
-# Workflow defaults; model bindings and escalation order are unchanged.
 orchestrator_production_edits_allowed = ["authorized-implementation"]
-standard_skip_reviewer = true
-major_requires_architect = true
-major_requires_reviewer = false
-workers_run_focused_checks = true
-
-luna_self_repair_attempts = 1
-complex_self_repair_attempts = 1
-escalation_chain = ["polyforge-luna", "polyforge-complex", "polyforge-astra"]
-major_escalation_chain = ["polyforge-luna", "polyforge-major-worker", "polyforge-astra"]
-major_initial_design_requires_astra = true
-major_followup_requires_astra_baseline = true
-major_fundamental_redesign_requires_astra = true
-time_based_escalation = false
-max_automatic_astra_invocations = 1
-second_astra_requires_new_evidence = true
-astra_minimum_scope_only = true
-return_bounded_work_to_luna = true
-
-parallel_enabled = true
-parallel_requires_non_overlapping_scope = true
-parallel_requires_dependencies_satisfied = true
 max_parallel_workers = 2
-parallel_fallback_to_serial = true
 
-major_architecture_signals = [
-  "irreversible-or-high-risk-migration",
-  "cross-service-public-contract",
-  "critical-security-boundary",
-  "distributed-consistency-or-difficult-concurrency",
-  "multi-module-core-architecture-replacement",
-  "material-design-uncertainty-unresolved-by-sol"
-]
-
-complexity_escalators = [
-  "security-sensitive", "权限/认证", "并发", "concurrency", "race condition",
-  "migration", "数据迁移", "public API contract", "公共接口变更",
-  "distributed", "分布式", "performance-critical", "性能敏感",
-  "unknown-root-cause-debug", "疑难调试", "large-refactor", "大范围重构",
-  "cross-module-state", "跨模块状态机"
-]
-
-stall_signals = [
-  "自修复后仍未通过验收",
-  "明确报告能力不足或无法继续",
-  "反复在同一失败上循环且没有有效进展",
-  "发现超出原规格的复杂依赖或高风险实现",
-  "需要复杂架构决策而当前规格不足"
-]
-
-# Role bindings are consumed by the sync/validation script.
+# Bindings are choices, not a required escalation sequence or design prerequisite.
 [roles]
 polyforge-scout = "scout"
-polyforge-architect = "architect"
 polyforge-luna = "luna"
 polyforge-complex = "complex"
-polyforge-refiner = "refiner"
-polyforge-major-worker = "major_worker"
+polyforge-architect = "architect"
 polyforge-reviewer = "reviewer"
 polyforge-astra = "astra"
 
-# Offline allowlist used by this release, not a live account availability check.
+# Offline release allowlist, not a live account availability check.
 [model_support]
 "gpt-6.1-sol" = ["low", "medium", "high", "xhigh", "max"]
 "gpt-6-luna" = ["none", "low", "medium", "high", "xhigh", "max"]
 "gpt-6-astra" = ["low", "medium", "high", "xhigh", "max"]
 
 [retired]
-# Only these known installation files are backed up and removed on --install.
-role_files = ["polyforge-luna56.toml"]
+# Back up and remove only these known installed role files.
+role_files = ["polyforge-luna56.toml", "polyforge-refiner.toml", "polyforge-major-worker.toml"]
 

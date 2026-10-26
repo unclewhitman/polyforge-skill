@@ -39,15 +39,16 @@ class SyncConfigTests(unittest.TestCase):
         cfg = self.cfg()
         sync.check_repo(self.root, cfg)
         self.assertEqual(cfg['architect']['model'], 'gpt-6-astra')
-        self.assertEqual(cfg['architect']['reasoning_effort'], 'high')
-        self.assertEqual(cfg['astra']['reasoning_effort'], 'high')
-        for role in ('major_worker',):
-            self.assertEqual((cfg[role]['model'], cfg[role]['reasoning_effort']), ('gpt-6.1-sol', 'max'))
-        for role in ('orchestrator', 'refiner', 'complex', 'reviewer'):
+        self.assertEqual(cfg['architect']['reasoning_effort'], 'xhigh')
+        self.assertEqual(cfg['astra']['reasoning_effort'], 'xhigh')
+        self.assertEqual((cfg['complex']['model'], cfg['complex']['reasoning_effort']), ('gpt-6.1-sol', 'xhigh'))
+        for role in ('orchestrator', 'reviewer'):
             self.assertEqual((cfg[role]['model'], cfg[role]['reasoning_effort']), ('gpt-6.1-sol', 'high'))
         self.assertEqual(cfg['luna']['reasoning_effort'], 'max')
-        self.assertEqual(cfg['scout']['reasoning_effort'], 'medium')
-        self.assertEqual(len(cfg['roles']), 8)
+        self.assertEqual(cfg['scout']['reasoning_effort'], 'high')
+        self.assertEqual(len(cfg['roles']), 6)
+        self.assertNotIn('refiner', cfg)
+        self.assertNotIn('major_worker', cfg)
         self.assertNotIn('luna56', cfg)
         self.assertNotIn('gpt-5.6-luna', cfg['model_support'])
         self.assertFalse((self.root / 'codex-agents/polyforge-luna56.toml').exists())
@@ -78,7 +79,7 @@ class SyncConfigTests(unittest.TestCase):
             self.cfg()
 
     def test_unknown_route_rejected(self):
-        self.change_router('default_worker = "polyforge-luna"', 'default_worker = "polyforge-missing"')
+        self.change_router('scout_agent = "polyforge-scout"', 'scout_agent = "polyforge-missing"')
         with self.assertRaisesRegex(sync.ConfigError, 'Unknown route binding'):
             self.cfg()
 
@@ -101,7 +102,8 @@ class SyncConfigTests(unittest.TestCase):
 
     def test_sync_validates_all_templates_before_writing(self):
         first = self.root / 'codex-agents/polyforge-scout.toml'
-        first.write_text(first.read_text(encoding='utf-8').replace('"medium"', '"high"', 1), encoding='utf-8')
+        first.write_text(re.sub(r'^model_reasoning_effort = .*$', 'model_reasoning_effort = "low"',
+                               first.read_text(encoding='utf-8'), flags=re.M), encoding='utf-8')
         last = self.root / 'codex-agents/polyforge-astra.toml'
         last.write_text(last.read_text(encoding='utf-8').replace('developer_instructions', 'wrong_instructions'), encoding='utf-8')
         before = self.snapshot(self.root)
@@ -109,26 +111,28 @@ class SyncConfigTests(unittest.TestCase):
             sync.sync_repo(self.root, self.cfg())
         self.assertEqual(before, self.snapshot(self.root))
 
-    def test_intermediate_luna_tier_rejected(self):
-        self.change_router('escalation_chain = ["polyforge-luna", "polyforge-complex", "polyforge-astra"]',
-                           'escalation_chain = ["polyforge-luna", "polyforge-luna56", "polyforge-complex", "polyforge-astra"]')
-        with self.assertRaisesRegex(sync.ConfigError, 'must be direct'):
-            self.cfg()
-
-    def test_first_major_design_cannot_switch_to_sol(self):
+    def test_supported_model_settings_are_configurable(self):
         self.change_router('[architect]\nmodel = "gpt-6-astra"', '[architect]\nmodel = "gpt-6.1-sol"')
-        with self.assertRaisesRegex(sync.ConfigError, 'architect_agent must use Astra'):
-            self.cfg()
+        cfg = self.cfg()
+        self.assertEqual(sync.sync_repo(self.root, cfg), 1)
+        _, installed_role = sync.read_toml(self.root / 'codex-agents/polyforge-architect.toml')
+        self.assertEqual(installed_role['model'], 'gpt-6.1-sol')
+        self.assertEqual(installed_role['sandbox_mode'], 'read-only')
 
-    def test_major_followup_efforts_cannot_silently_change(self):
-        for section, expected, wrong in (('refiner', 'high', 'max'), ('major_worker', 'max', 'high')):
-            with self.subTest(section=section):
-                old = f'[{section}]\nmodel = "gpt-6.1-sol"\nreasoning_effort = "{expected}"'
-                new = f'[{section}]\nmodel = "gpt-6.1-sol"\nreasoning_effort = "{wrong}"'
-                self.change_router(old, new)
-                with self.assertRaisesRegex(sync.ConfigError, f'must use GPT-6.1 Sol {expected}'):
-                    self.cfg()
-                self.change_router(new, old)
+    def test_routing_needs_no_baseline_or_sequential_escalation(self):
+        path = self.root / 'config/model-router.toml'
+        raw = path.read_text(encoding='utf-8')
+        raw = re.sub(r'^(?:escalation_chain|major_escalation_chain|major_initial_design_requires_astra|'
+                     r'major_followup_requires_astra_baseline|major_fundamental_redesign_requires_astra) = .*\n',
+                     '', raw, flags=re.M)
+        path.write_text(raw, encoding='utf-8')
+        sync.check_repo(self.root, self.cfg())
+
+    def test_helpers_can_be_selected_without_a_ladder(self):
+        self.change_router('bounded_worker = "polyforge-luna"', 'bounded_worker = "polyforge-complex"')
+        cfg = self.cfg()
+        sync.check_repo(self.root, cfg)
+        self.assertEqual(cfg['router']['bounded_worker'], 'polyforge-complex')
 
     def test_read_only_role_cannot_gain_write_access(self):
         self.change_router('[reviewer]\nmodel = "gpt-6.1-sol"\nreasoning_effort = "high"\nsandbox_mode = "read-only"',
@@ -153,6 +157,11 @@ class SyncConfigTests(unittest.TestCase):
         cfg = self.cfg()
         sync.check_repo(self.root, cfg)
         self.assertIn('authorized-implementation', cfg['router']['orchestrator_production_edits_allowed'])
+
+    def test_read_only_helper_cannot_be_used_as_implementation_worker(self):
+        self.change_router('bounded_worker = "polyforge-luna"', 'bounded_worker = "polyforge-scout"')
+        with self.assertRaisesRegex(sync.ConfigError, 'requires workspace-write'):
+            self.cfg()
 
     def test_install_backs_up_old_roles_and_preserves_user_config(self):
         (self.home / 'agents').mkdir(parents=True)
@@ -255,12 +264,14 @@ class SyncConfigTests(unittest.TestCase):
         self.assertEqual(before, self.snapshot(self.home))
 
     def test_retirement_path_traversal_rejected(self):
-        self.change_router('role_files = ["polyforge-luna56.toml"]', 'role_files = ["../outside.toml"]')
+        self.change_router('role_files = ["polyforge-luna56.toml", "polyforge-refiner.toml", "polyforge-major-worker.toml"]',
+                           'role_files = ["../outside.toml"]')
         with self.assertRaisesRegex(sync.ConfigError, 'safe PolyForge TOML'):
             self.cfg()
 
     def test_active_role_cannot_be_retired(self):
-        self.change_router('role_files = ["polyforge-luna56.toml"]', 'role_files = ["polyforge-scout.toml"]')
+        self.change_router('role_files = ["polyforge-luna56.toml", "polyforge-refiner.toml", "polyforge-major-worker.toml"]',
+                           'role_files = ["polyforge-scout.toml"]')
         with self.assertRaisesRegex(sync.ConfigError, 'cannot be active'):
             self.cfg()
 

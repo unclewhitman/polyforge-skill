@@ -19,8 +19,7 @@ class ConfigError(Exception):
     """A configuration or path-containment failure."""
 
 
-ROUTE_KEYS = ('scout_agent', 'architect_agent', 'default_worker',
-              'complex_worker', 'followup_architect_agent', 'major_complex_worker',
+ROUTE_KEYS = ('scout_agent', 'architect_agent', 'bounded_worker', 'complex_worker',
               'rescue_worker', 'reviewer_agent')
 PACKAGE_DIRS = ('agents', 'codex-agents', 'config', 'references', 'scripts', 'templates')
 NAME = re.compile(r'polyforge-[a-z0-9]+(?:-[a-z0-9]+)*\Z')
@@ -104,27 +103,10 @@ def load_config(root: Path) -> dict:
     for key in ROUTE_KEYS:
         if not isinstance(router.get(key), str) or router[key] not in roles:
             raise ConfigError(f'Unknown route binding: router.{key}={router.get(key)}')
-    for key in ('escalation_chain', 'major_escalation_chain'):
-        chain = router.get(key)
-        middle = router['complex_worker' if key == 'escalation_chain' else 'major_complex_worker']
-        expected = [router['default_worker'], middle, router['rescue_worker']]
-        if chain != expected or len(set(chain)) != len(chain):
-            raise ConfigError(f'{key} must be direct default-worker -> Sol -> rescue')
-    for key in ('major_initial_design_requires_astra', 'major_followup_requires_astra_baseline',
-                'major_fundamental_redesign_requires_astra'):
-        if router.get(key) is not True:
-            raise ConfigError(f'Required major boundary disabled: {key}')
-    for key in ('architect_agent', 'rescue_worker'):
-        if cfg[roles[router[key]]]['model'] != 'gpt-6-astra':
-            raise ConfigError(f'{key} must use Astra')
-    for key, effort in (('followup_architect_agent', 'high'), ('major_complex_worker', 'max')):
-        role = cfg[roles[router[key]]]
-        if (role['model'], role['reasoning_effort']) != ('gpt-6.1-sol', effort):
-            raise ConfigError(f'{key} must use GPT-6.1 Sol {effort}')
-    for key in ('scout_agent', 'architect_agent', 'followup_architect_agent', 'reviewer_agent'):
+    for key in ('scout_agent', 'architect_agent', 'reviewer_agent'):
         if cfg[roles[router[key]]]['sandbox_mode'] != 'read-only':
             raise ConfigError(f'{key} must remain read-only')
-    for key in ('default_worker', 'complex_worker', 'major_complex_worker', 'rescue_worker'):
+    for key in ('bounded_worker', 'complex_worker', 'rescue_worker'):
         if cfg[roles[router[key]]]['sandbox_mode'] != 'workspace-write':
             raise ConfigError(f'{key} requires workspace-write')
     version = cfg.get('release', {}).get('version')

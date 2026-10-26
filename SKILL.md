@@ -2,7 +2,7 @@
 name: polyforge
 description: "Use when implementing features, bug fixes, refactors or multi-step development from a user's requirements. Not for explanation-only or review-only requests."
 metadata:
-  version: "3.0.0"
+  version: "3.1.0"
   short-description: "Direct implementation with focused verification"
 ---
 
@@ -24,11 +24,19 @@ Use existing project context when it saves discovery. Verify material facts agai
 
 Delegate a bounded independent task when parallel work or specialized help will reduce completion time. Otherwise keep the work in the current thread. Give the helper the goal, relevant files or boundaries, and how to verify success; use a full handoff only when changing owners or escalating stalled work. Continue with the same worker for local corrections.
 
-Model bindings, reasoning efforts and escalation order remain defined in `config/model-router.toml`. Read it when selecting a configured helper, not as a per-task setup ceremony. The skill does not change the active main-thread model. If an optional role is unavailable, continue work the current session can safely perform and report only the limitation that matters.
+Model bindings and reasoning efforts are defined in `config/model-router.toml`. Read it when selecting a configured helper, not as a per-task setup ceremony. The main-task preference is Sol high; the skill does not change the active main-thread model. If an optional role is unavailable, continue work the current session can safely perform and report only the limitation that matters.
 
-For a genuine major-architecture design pass, retain the configured Astra-first design and concise baseline. The follow-up designer and major complex worker retain their Astra-baseline requirement. Keep these existing model-routing boundaries; they do not require a separate design pass for routine implementation. Read the relevant role instructions only when using that role.
+Select assistance by the actual work:
+- scout: Luna high, read-only, for a targeted repository question;
+- bounded worker: Luna max, for clear independent implementation;
+- complex worker: Sol xhigh, for tightly coupled cross-module changes, difficult debugging, concurrency, transactions or contract-heavy refactors;
+- architect: Astra xhigh, read-only, for a consequential unresolved design question;
+- rescue worker: Astra xhigh, workspace-write, for a difficult root cause or implementation beyond the current worker's capability;
+- reviewer: Sol high, read-only, for the optional independent review described below.
 
-Keep concurrent write scopes independent and respect the session's capacity. Preserve other contributors' valid changes. On failure, use the concrete evidence to repair the affected scope; repeated failure on the same cause calls for diagnosis or the existing escalation path, rather than restarting correct work or cycling through every model.
+These are alternatives, not a mandatory ladder. Choose a suitable helper directly when evidence supports it; prior failure in a weaker model is not required. Clear work can start with Luna max, and known difficult implementation can go directly to Sol xhigh. An existing workable design is enough to implement, including complex work: no Astra pass or named design baseline is required. The main thread handles local design refinements. After a difficult part is resolved, the current owner can finish the remaining work instead of handing it back merely to use a smaller model. Read role instructions only when using that role.
+
+Keep concurrent write scopes independent and respect the session's capacity. Preserve other contributors' valid changes. On failure, repair the affected scope using concrete evidence; repeated failure on the same cause calls for diagnosis or a better-suited helper rather than restarting correct work or cycling through every model. Permissions, dependencies and missing user decisions are resolved directly; they are not reasons to increase model effort.
 
 ## Verify proportionally
 
