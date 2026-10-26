@@ -3,6 +3,7 @@ import contextlib
 import importlib.util
 import io
 from pathlib import Path
+import re
 import shutil
 import tempfile
 import unittest
@@ -129,9 +130,10 @@ class SyncConfigTests(unittest.TestCase):
                     self.cfg()
                 self.change_router(new, old)
 
-    def test_micro_edit_safety_gate_required(self):
-        self.change_router('micro_edits_require_low_risk = true', 'micro_edits_require_low_risk = false')
-        with self.assertRaisesRegex(sync.ConfigError, 'Micro-edit safety gate'):
+    def test_read_only_role_cannot_gain_write_access(self):
+        self.change_router('[reviewer]\nmodel = "gpt-6.1-sol"\nreasoning_effort = "high"\nsandbox_mode = "read-only"',
+                           '[reviewer]\nmodel = "gpt-6.1-sol"\nreasoning_effort = "high"\nsandbox_mode = "workspace-write"')
+        with self.assertRaisesRegex(sync.ConfigError, 'must remain read-only'):
             self.cfg()
 
     def test_invalid_toml_rejected(self):
@@ -140,11 +142,17 @@ class SyncConfigTests(unittest.TestCase):
         with self.assertRaisesRegex(sync.ConfigError, 'Cannot parse'):
             self.cfg()
 
-    def test_conflicting_micro_edit_policy_rejected(self):
-        self.change_router('orchestrator_production_edits_integration_only = false',
-                           'orchestrator_production_edits_integration_only = true')
-        with self.assertRaisesRegex(sync.ConfigError, 'conflicts with integration-only'):
-            self.cfg()
+    def test_main_thread_can_complete_authorized_implementation(self):
+        path = self.root / 'config/model-router.toml'
+        raw = path.read_text(encoding='utf-8')
+        raw, count = re.subn(r'^orchestrator_production_edits_allowed = .*$',
+                            'orchestrator_production_edits_allowed = ["authorized-implementation"]',
+                            raw, flags=re.M)
+        self.assertEqual(count, 1)
+        path.write_text(raw, encoding='utf-8')
+        cfg = self.cfg()
+        sync.check_repo(self.root, cfg)
+        self.assertIn('authorized-implementation', cfg['router']['orchestrator_production_edits_allowed'])
 
     def test_install_backs_up_old_roles_and_preserves_user_config(self):
         (self.home / 'agents').mkdir(parents=True)
@@ -259,3 +267,4 @@ class SyncConfigTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

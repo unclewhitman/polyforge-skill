@@ -1,9 +1,9 @@
-# PolyForge single source of truth for model roles and orchestration behavior.
+# PolyForge model bindings and helper preferences; workflow policy lives in SKILL.md.
 # Run scripts/sync-config.py --sync-repo after changing role settings.
 # Run scripts/sync-config.py --install to install the skill and managed roles.
 
 [release]
-version = "2.4.4"
+version = "3.0.0"
 
 [orchestrator]
 model = "gpt-6.1-sol"
@@ -50,39 +50,14 @@ model = "gpt-6-astra"
 reasoning_effort = "high"
 sandbox_mode = "workspace-write"
 
-[understanding]
-context_discovery_enabled = true
-requirement_expansion_enabled = true
-minimal_questioning = true
-prefer_targeted_context = true
-allow_infer_local_implementation_details = true
-record_material_assumptions = true
-ask_on_product_behavior_change = true
-ask_on_data_model_change = true
-ask_on_public_contract_change = true
-ask_on_core_architecture_change = true
-ask_on_security_boundary_change = true
-ask_on_major_compatibility_change = true
-
 [project_context]
 enabled = true
 path = ".polyforge/project-context.md"
 legacy_path = ".multi-model-dev/project-context.md"
-auto_create = true
+auto_create = false
 auto_migrate_legacy = true
-auto_update_after_success = true
-load_before_context_discovery = true
-verify_relevant_entries_before_use = true
-repository_truth_wins = true
+auto_update_after_success = false
 exclude_from_git = true
-orchestrator_single_writer = true
-redact_secrets = true
-store_user_confirmed_decisions = true
-store_repo_verified_architecture = true
-store_stable_commands = true
-store_reusable_conventions = true
-store_task_history = false
-store_temporary_debug_notes = false
 
 [router]
 scout_agent = "polyforge-scout"
@@ -94,29 +69,12 @@ major_complex_worker = "polyforge-major-worker"
 rescue_worker = "polyforge-astra"
 reviewer_agent = "polyforge-reviewer"
 
-lightweight_path_enabled = true
-lightweight_skip_architect = true
-lightweight_skip_reviewer = true
-lightweight_max_files_signal = 2
-lightweight_requires_clear_scope = true
-lightweight_requires_low_risk = true
-
-workflow_levels = ["light", "standard", "major"]
-standard_orchestrator_design = true
-standard_skip_architect = true
+# Workflow defaults; model bindings and escalation order are unchanged.
+orchestrator_production_edits_allowed = ["authorized-implementation"]
 standard_skip_reviewer = true
 major_requires_architect = true
-major_requires_reviewer = true
-orchestrator_production_edits_integration_only = false
-# Main-thread production edits remain restricted to integration conflicts or micro edits.
-orchestrator_production_edits_allowed = ["integration-conflict", "verified-low-risk-micro-edit"]
-micro_edits_main_thread_enabled = true
-micro_edits_require_clear_scope = true
-micro_edits_require_low_risk = true
-micro_edits_require_quick_verification = true
-luna_owns_bounded_tests_and_docs = true
+major_requires_reviewer = false
 workers_run_focused_checks = true
-orchestrator_full_checks_at_milestones = true
 
 luna_self_repair_attempts = 1
 complex_self_repair_attempts = 1
@@ -182,3 +140,4 @@ polyforge-astra = "astra"
 [retired]
 # Only these known installation files are backed up and removed on --install.
 role_files = ["polyforge-luna56.toml"]
+

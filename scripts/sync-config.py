@@ -127,15 +127,6 @@ def load_config(root: Path) -> dict:
     for key in ('default_worker', 'complex_worker', 'major_complex_worker', 'rescue_worker'):
         if cfg[roles[router[key]]]['sandbox_mode'] != 'workspace-write':
             raise ConfigError(f'{key} requires workspace-write')
-    if router.get('micro_edits_main_thread_enabled'):
-        for key in ('micro_edits_require_clear_scope', 'micro_edits_require_low_risk',
-                    'micro_edits_require_quick_verification'):
-            if router.get(key) is not True:
-                raise ConfigError(f'Micro-edit safety gate disabled: {key}')
-        if router.get('orchestrator_production_edits_integration_only') is not False:
-            raise ConfigError('Micro-edit exception conflicts with integration-only setting')
-        if router.get('orchestrator_production_edits_allowed') != ['integration-conflict', 'verified-low-risk-micro-edit']:
-            raise ConfigError('Main-thread edits must remain limited to integration or verified micro edits')
     version = cfg.get('release', {}).get('version')
     if not isinstance(version, str) or not re.fullmatch(r'\d+\.\d+\.\d+', version):
         raise ConfigError('Invalid release version')
@@ -323,3 +314,4 @@ def main(argv=None) -> int:
 
 if __name__ == '__main__':
     sys.exit(main())
+

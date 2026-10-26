@@ -1,32 +1,36 @@
-# Configuration synchronization
+# Configuration and installation
 
-Requires Python 3.11+ with standard-library tomllib; no packages are needed. Run from the skill folder, or pass --root /path/to/polyforge.
+Use Python 3.11+ with standard-library tomllib. Run from the skill folder or pass --root /path/to/polyforge. These are package-maintenance commands, not per-task development gates.
 
-## Repository check and synchronization
+## Install or update
+
+```text
+python scripts/sync-config.py --install
+```
+
+Installation first validates the package, then copies the skill and eight managed role definitions under CODEX_HOME (default ~/.codex). It preserves user config.toml, global defaults and unrelated roles. Start a new/reloaded session to expose updated instructions; installation cannot change the active main-thread model or hot-reload roles.
+
+To preview or diagnose an installation:
+
+```text
+python scripts/sync-config.py --install --dry-run
+python scripts/sync-config.py --check-installed
+```
+
+Changed existing files are backed up under polyforge-backups/<UTC timestamp>/ before replacement. Identical files are skipped. Only named retired PolyForge roles are backed up and removed from their known installation paths. Restore individual files from backup if needed. Containment checks reject writes through redirected destinations or outside the intended directory.
+
+## Maintain the package
 
 ```text
 python scripts/sync-config.py --check
 python scripts/sync-config.py --sync-repo
 ```
 
---check is the default and writes nothing. It checks TOML syntax, all role bindings, offline model/effort support, model/effort/sandbox drift, route references, direct escalation chains, mandatory Astra design and follow-up role boundaries. SKILL and README versions must match the router.
+--check validates TOML, role bindings, supported offline model/effort combinations, managed-header drift, read/write role boundaries and release versions. The existing Astra-first major-design and follow-up model-routing boundaries remain unchanged in v3.0.0.
 
---sync-repo updates only role name, model, model_reasoning_effort and sandbox_mode from the router, preserving descriptions, instructions and other content. All templates and destinations are validated before writes. Edit prose manually when behavior changes. Unknown models require a verified addition to model_support before use. The allowlist is a release snapshot; it does not check live account access or client support.
+--sync-repo updates role name, model, model_reasoning_effort and sandbox_mode while preserving descriptions and developer_instructions. Keep behavior in SKILL.md and align role text when changing responsibilities; passing configuration checks does not prove behavioral consistency or live account/model availability.
 
-## Installation and backups
+Workflow guidance is defined in SKILL.md. Role model settings and escalation order remain in config/model-router.toml. Main-thread implementation is allowed for the user's authorized development scope; it is no longer limited to micro edits and integration conflicts.
 
-```text
-python scripts/sync-config.py --install --dry-run
-python scripts/sync-config.py --install
-python scripts/sync-config.py --check-installed
-```
+Optional project-context initializers run from the target project. Existing context is a cache of durable facts, not an approval gate or mandatory artifact.
 
-Override CODEX_HOME / ~/.codex with --codex-home /path/to/codex when needed. Installation requires a passing repository check. It copies SKILL.md, README.md and files under agents, codex-agents, config, references, scripts and templates into skills/polyforge, then the eight bound role definitions into agents. Tests and caches are excluded. User config.toml and global defaults are untouched; unrelated roles are preserved. Only explicitly retired PolyForge role files are backed up and removed. The retired compatibility role is backed up and removed from its two known installation paths.
-
-Changed existing files are backed up under polyforge-backups/<UTC timestamp>/ with paths relative to Codex home. New files need no backup; identical files are skipped. Containment checks run before writes. Symlinks escaping the intended destination are rejected. Restore individual files from backup as needed, then recheck. Repeated installation with unchanged sources writes nothing and creates no backup.
-
-The retired `polyforge-luna56.toml` is removed only from `agents/` and `skills/polyforge/codex-agents/` beneath the selected Codex home, after both existing files have been backed up. --dry-run lists these deletions without performing them; --check-installed reports any retired file still present. Retirement entries cannot name an active role or escape these directories.
-
---check-installed compares both the installed package and managed roles to this release, without reading user config.toml or credentials. It is read-only. Installation to a restricted location remains subject to normal session permissions.
-
-Start a new/reloaded session to expose changed roles. Choose GPT-6.1 Sol high for the main task separately; installation does not switch or hot-reload an active task.

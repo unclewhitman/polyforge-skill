@@ -1,6 +1,7 @@
 interface:
   display_name: "PolyForge"
-  short_description: "Coding orchestration with Astra design and Sol follow-through"
-  default_prompt: "Use $polyforge to complete this development request: use Astra for initial major design, GPT-6.1 Sol high for follow-up design and max for major complex implementation, Luna for bounded implementation, and verify the result."
+  short_description: "Direct development with focused verification"
+  default_prompt: "Use $polyforge to implement these requirements directly, verify the affected behavior, and deliver; use helpers or independent review only when useful."
 policy:
   allow_implicit_invocation: true
+

@@ -1,39 +1,21 @@
-# PolyForge structured handoff
+# PolyForge handoff
 
-Use for every implementation delegation and escalation (GPT-6 Luna → GPT-6.1 Sol high → Astra high; major complex work with an Astra baseline uses GPT-6.1 Sol max instead of high), and for returning bounded work to Luna.
+For ordinary delegation, give the helper the goal, relevant files or boundaries, and a useful acceptance check. A short message is enough. Continue local corrections in the existing worker context.
+
+Use the fuller form below only for an ownership change or escalation. Include fields that contain useful information; omit empty fields.
 
 ```yaml
-task_id: T1
-goal: "Exact deliverable"
-user_goal: "Original user goal"
-assumptions: []
-relevant_project_context: []
-workflow_level: standard # light | standard | major
-astra_design_baseline: null # required for major follow-up design / complex implementation
-design_delta: []
-
-depends_on: []
-parallel_safe: true
-conflict_scope: []
-
-scope:
-  in_scope: []
-  forbidden: []
-
-contracts: []
-acceptance: []
-verification_commands: []
-
+goal: "Requested outcome"
+scope: []
+constraints_or_contracts: []
 current_state:
-  status: not_started   # not_started | in_progress | stalled | failed | completed
   changed_files: []
   completed_work: []
   remaining_work: []
-  failure_evidence: []
-  verification_history: []
-
-context_candidates: []
-open_decisions: []
+failure_evidence: []
+verification: [] # command, result, covered scope, and relevant code state
+astra_design_baseline: null # only for roles that require the existing major-design baseline
 ```
 
-Parallel work is allowed only when dependencies are satisfied and write/conflict scopes do not overlap. Workers never write project context directly.
+Continue from correct existing work. Passing evidence is reusable while its relevant inputs remain unchanged. Keep concurrent write scopes independent. A local review finding needs its location, failure condition and expected behavior, not a new full task card.
+
