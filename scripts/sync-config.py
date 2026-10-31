@@ -19,7 +19,7 @@ class ConfigError(Exception):
     """A configuration or path-containment failure."""
 
 
-ROUTE_KEYS = ('scout_agent', 'architect_agent', 'bounded_worker', 'complex_worker',
+ROUTE_KEYS = ('scout_agent', 'architect_agent', 'bounded_worker', 'implementation_worker', 'complex_worker',
               'rescue_worker', 'reviewer_agent')
 PACKAGE_DIRS = ('agents', 'codex-agents', 'config', 'references', 'scripts', 'templates')
 NAME = re.compile(r'polyforge-[a-z0-9]+(?:-[a-z0-9]+)*\Z')
@@ -106,7 +106,7 @@ def load_config(root: Path) -> dict:
     for key in ('scout_agent', 'architect_agent', 'reviewer_agent'):
         if cfg[roles[router[key]]]['sandbox_mode'] != 'read-only':
             raise ConfigError(f'{key} must remain read-only')
-    for key in ('bounded_worker', 'complex_worker', 'rescue_worker'):
+    for key in ('bounded_worker', 'implementation_worker', 'complex_worker', 'rescue_worker'):
         if cfg[roles[router[key]]]['sandbox_mode'] != 'workspace-write':
             raise ConfigError(f'{key} requires workspace-write')
     version = cfg.get('release', {}).get('version')

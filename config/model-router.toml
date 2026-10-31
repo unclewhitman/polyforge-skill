@@ -3,7 +3,7 @@
 # Run scripts/sync-config.py --install to install the skill and managed roles.
 
 [release]
-version = "3.1.0"
+version = "3.2.0"
 
 [orchestrator]
 model = "gpt-6.1-sol"
@@ -17,6 +17,11 @@ sandbox_mode = "read-only"
 
 [luna]
 model = "gpt-6-luna"
+reasoning_effort = "max"
+sandbox_mode = "workspace-write"
+
+[terra]
+model = "gpt-6.1-terra"
 reasoning_effort = "max"
 sandbox_mode = "workspace-write"
 
@@ -52,6 +57,7 @@ exclude_from_git = true
 [router]
 scout_agent = "polyforge-scout"
 bounded_worker = "polyforge-luna"
+implementation_worker = "polyforge-terra"
 complex_worker = "polyforge-complex"
 architect_agent = "polyforge-architect"
 rescue_worker = "polyforge-astra"
@@ -63,6 +69,7 @@ max_parallel_workers = 2
 [roles]
 polyforge-scout = "scout"
 polyforge-luna = "luna"
+polyforge-terra = "terra"
 polyforge-complex = "complex"
 polyforge-architect = "architect"
 polyforge-reviewer = "reviewer"
@@ -71,6 +78,7 @@ polyforge-astra = "astra"
 # Offline release allowlist, not a live account availability check.
 [model_support]
 "gpt-6.1-sol" = ["low", "medium", "high", "xhigh", "max"]
+"gpt-6.1-terra" = ["none", "low", "medium", "high", "xhigh", "max"]
 "gpt-6-luna" = ["none", "low", "medium", "high", "xhigh", "max"]
 "gpt-6-astra" = ["low", "medium", "high", "xhigh", "max"]
 

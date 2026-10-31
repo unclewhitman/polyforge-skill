@@ -46,7 +46,9 @@ class SyncConfigTests(unittest.TestCase):
             self.assertEqual((cfg[role]['model'], cfg[role]['reasoning_effort']), ('gpt-6.1-sol', 'high'))
         self.assertEqual(cfg['luna']['reasoning_effort'], 'max')
         self.assertEqual(cfg['scout']['reasoning_effort'], 'high')
-        self.assertEqual(len(cfg['roles']), 6)
+        self.assertEqual((cfg['terra']['model'], cfg['terra']['reasoning_effort']), ('gpt-6.1-terra', 'max'))
+        self.assertEqual(cfg['router']['implementation_worker'], 'polyforge-terra')
+        self.assertEqual(len(cfg['roles']), 7)
         self.assertNotIn('refiner', cfg)
         self.assertNotIn('major_worker', cfg)
         self.assertNotIn('luna56', cfg)
@@ -159,9 +161,21 @@ class SyncConfigTests(unittest.TestCase):
         self.assertIn('authorized-implementation', cfg['router']['orchestrator_production_edits_allowed'])
 
     def test_read_only_helper_cannot_be_used_as_implementation_worker(self):
-        self.change_router('bounded_worker = "polyforge-luna"', 'bounded_worker = "polyforge-scout"')
-        with self.assertRaisesRegex(sync.ConfigError, 'requires workspace-write'):
-            self.cfg()
+        for key, role in (('bounded_worker', 'polyforge-luna'), ('implementation_worker', 'polyforge-terra')):
+            with self.subTest(route=key):
+                original = f'{key} = "{role}"'
+                invalid = f'{key} = "polyforge-scout"'
+                self.change_router(original, invalid)
+                with self.assertRaisesRegex(sync.ConfigError, 'requires workspace-write'):
+                    self.cfg()
+                self.change_router(invalid, original)
+
+    def test_terra_route_must_exist_before_installation(self):
+        self.change_router('implementation_worker = "polyforge-terra"\n', '')
+        with contextlib.redirect_stderr(io.StringIO()) as output:
+            self.assertEqual(sync.main(['--root', str(self.root), '--codex-home', str(self.home), '--install']), 1)
+        self.assertIn('Unknown route binding: router.implementation_worker', output.getvalue())
+        self.assertFalse(self.home.exists())
 
     def test_install_backs_up_old_roles_and_preserves_user_config(self):
         (self.home / 'agents').mkdir(parents=True)
@@ -169,15 +183,17 @@ class SyncConfigTests(unittest.TestCase):
         (self.home / 'config.toml').write_bytes(user_config)
         unrelated = b'custom-role-content\n'
         (self.home / 'agents/my-custom-role.toml').write_bytes(unrelated)
-        (self.home / 'agents/polyforge-terra.toml').write_bytes(unrelated)
         old = b'model = "old-model"\n'
         (self.home / 'agents/polyforge-reviewer.toml').write_bytes(old)
+        (self.home / 'agents/polyforge-terra.toml').write_bytes(old)
         count, backup = sync.install(self.root, self.cfg(), self.home, False)
         self.assertGreater(count, 9)
         self.assertEqual((backup / 'agents/polyforge-reviewer.toml').read_bytes(), old)
+        self.assertEqual((backup / 'agents/polyforge-terra.toml').read_bytes(), old)
         self.assertEqual((self.home / 'config.toml').read_bytes(), user_config)
-        for name in ('my-custom-role.toml', 'polyforge-terra.toml'):
-            self.assertEqual((self.home / 'agents' / name).read_bytes(), unrelated)
+        self.assertEqual((self.home / 'agents/my-custom-role.toml').read_bytes(), unrelated)
+        _, terra = sync.read_toml(self.home / 'agents/polyforge-terra.toml')
+        self.assertEqual((terra['model'], terra['model_reasoning_effort']), ('gpt-6.1-terra', 'max'))
         sync.check_installed(self.root, self.cfg(), self.home)
         self.assertFalse((self.home / 'skills/polyforge/tests').exists())
 

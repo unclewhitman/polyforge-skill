@@ -8,7 +8,7 @@ Use Python 3.11+ with standard-library tomllib. Run from the skill folder or pas
 python scripts/sync-config.py --install
 ```
 
-Installation first validates the package, then copies the skill and six managed role definitions under CODEX_HOME (default ~/.codex). It preserves user config.toml, global defaults and unrelated roles. Start a new/reloaded session to expose updated instructions; installation cannot change the active main-thread model or hot-reload roles.
+Installation first validates the package, then copies the skill and seven managed role definitions under CODEX_HOME (default ~/.codex). It preserves user config.toml, global defaults and unrelated roles. Start a new/reloaded session to expose updated instructions; installation cannot change the active main-thread model or hot-reload roles.
 
 To preview or diagnose an installation:
 

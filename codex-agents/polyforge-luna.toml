@@ -1,5 +1,5 @@
 name = "polyforge-luna"
-description = "Optional bounded implementation helper for work that benefits from delegation."
+description = "Optional bounded implementation helper for simple, repetitive, clearly scoped independent work that benefits from delegation."
 model = "gpt-6-luna"
 model_reasoning_effort = "max"
 sandbox_mode = "workspace-write"
