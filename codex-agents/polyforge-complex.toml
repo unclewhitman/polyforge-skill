@@ -1,6 +1,6 @@
 name = "polyforge-complex"
 description = "Optional Sol xhigh implementation helper for coupled changes, difficult debugging and complex contracts."
-model = "gpt-6.1-sol"
+model = "gpt-6.2-sol"
 model_reasoning_effort = "xhigh"
 sandbox_mode = "workspace-write"
 

@@ -2,7 +2,7 @@
 name: polyforge
 description: "Use when implementing features, bug fixes, refactors or multi-step development from a user's requirements. Not for explanation-only or review-only requests."
 metadata:
-  version: "3.2.0"
+  version: "3.3.0"
   short-description: "Direct implementation with focused verification"
 ---
 
@@ -24,18 +24,18 @@ Use existing project context when it saves discovery. Verify material facts agai
 
 Delegate a bounded independent task when parallel work or specialized help will reduce completion time. Otherwise keep the work in the current thread. Give the helper the goal, relevant files or boundaries, and how to verify success; use a full handoff only when changing owners or escalating stalled work. Continue with the same worker for local corrections.
 
-Model bindings and reasoning efforts are defined in `config/model-router.toml`. Read it when selecting a configured helper, not as a per-task setup ceremony. The main-task preference is Sol high; the skill does not change the active main-thread model. If an optional role is unavailable, continue work the current session can safely perform and report only the limitation that matters.
+Model bindings and reasoning efforts are defined in `config/model-router.toml`. Read it when selecting a configured helper, not as a per-task setup ceremony. The main-task preference is GPT-6.2 Sol high; the skill does not change the active main-thread model. If an optional role is unavailable, continue work the current session can safely perform and report only the limitation that matters.
 
 Select assistance by the actual work:
-- scout: Luna high, read-only, for a targeted repository question;
-- bounded worker: Luna max, for simple, repetitive, clearly bounded independent implementation;
+- scout: GPT-6.1 Terra high, read-only, for a targeted repository question;
+- bounded worker: GPT-6.1 Terra max, for simple, repetitive, clearly bounded independent implementation;
 - implementation worker: GPT-6.1 Terra max, for regular features and moderately difficult scoped fixes with an existing approach, clear contracts and observable checks;
-- complex worker: Sol xhigh, for tightly coupled cross-module changes, difficult debugging, concurrency, transactions or contract-heavy refactors;
-- architect: Astra xhigh, read-only, for a consequential unresolved design question;
-- rescue worker: Astra xhigh, workspace-write, for a difficult root cause or implementation beyond the current worker's capability;
-- reviewer: Sol high, read-only, for the optional independent review described below.
+- complex worker: GPT-6.2 Sol xhigh, for tightly coupled cross-module changes, difficult debugging, concurrency, transactions or contract-heavy refactors;
+- architect: GPT-6.2 Astra xhigh, read-only, for a consequential unresolved design question;
+- rescue worker: GPT-6.2 Astra xhigh, workspace-write, for a difficult root cause or implementation beyond the current worker's capability;
+- reviewer: GPT-6.2 Sol high, read-only, for the optional independent review described below.
 
-These are alternatives, not a mandatory ladder. Choose a suitable helper directly when evidence supports it; prior failure in a weaker model is not required. For delegated work, choose Luna max for simple or repetitive changes, Terra max for known-pattern business logic, several-file feature changes or scoped fixes with clear contracts and checks, and Sol xhigh for tightly coupled work or difficult unknowns. Terra can also handle scoped screenshot-driven UI adjustments with observable verification. Choose Terra directly when it fits; neither a Luna failure nor a Terra pass is required before choosing another helper. An existing workable design is enough to implement, including complex work: no Astra pass or named design baseline is required. The main thread handles local design refinements. After a difficult part is resolved, the current owner can finish the remaining work instead of handing it back merely to use a smaller model. Read role instructions only when using that role.
+These are alternatives, not a mandatory ladder. Choose a suitable helper directly when evidence supports it; prior failure in a weaker model is not required. For delegated work, choose the bounded worker for simple or repetitive changes and the implementation worker for known-pattern features, several-file changes, scoped fixes or screenshot-driven UI adjustments with clear checks. Choose the complex worker for tightly coupled work or difficult unknowns. An existing workable design is enough to implement, including complex work: no Astra pass or named design baseline is required. The main thread handles local design refinements. After a difficult part is resolved, the current owner can finish the remaining work instead of handing it back merely to use a smaller model. Read role instructions only when using that role.
 
 Keep concurrent write scopes independent and respect the session's capacity. Preserve other contributors' valid changes. On failure, repair the affected scope using concrete evidence; repeated failure on the same cause calls for diagnosis or a better-suited helper rather than restarting correct work or cycling through every model. Permissions, dependencies and missing user decisions are resolved directly; they are not reasons to increase model effort.
 

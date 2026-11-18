@@ -1,6 +1,6 @@
 name = "polyforge-scout"
 description = "Optional read-only scout for a targeted repository question."
-model = "gpt-6-luna"
+model = "gpt-6.1-terra"
 model_reasoning_effort = "high"
 sandbox_mode = "read-only"
 

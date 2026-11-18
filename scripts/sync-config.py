@@ -282,7 +282,7 @@ def main(argv=None) -> int:
                 count, backup = install(root, cfg, home, args.dry_run)
                 if not args.dry_run:
                     print(f'Installed/updated/retired {count} file(s). Backup: {backup or "not needed"}')
-                    print('Start a new/reloaded session; select GPT-6.1 Sol high for the main task separately.')
+                    print('Start a new/reloaded session; select GPT-6.2 Sol high for the main task separately.')
             elif args.check_installed:
                 check_installed(root, cfg, home)
                 print('Installed package and roles match this release.')

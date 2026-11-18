@@ -1,6 +1,6 @@
 # PolyForge
 
-PolyForge v3.2.0 prioritizes completing the user's development requirements with a short loop:
+PolyForge v3.3.0 prioritizes completing the user's development requirements with a short loop:
 
 `understand → implement → verify affected behavior → deliver`
 
@@ -14,18 +14,18 @@ Choose assistance by the actual work. The main task remains Sol high; seven opti
 
 | Optional role | Model and reasoning |
 | --- | --- |
-| Main task preference | GPT-6.1 Sol `high` |
-| Repository scout | GPT-6 Luna `high` |
-| Bounded implementation helper | GPT-6 Luna `max` |
+| Main task preference | GPT-6.2 Sol `high` |
+| Repository scout | GPT-6.1 Terra `high` |
+| Bounded implementation helper | GPT-6.1 Terra `max` |
 | Regular features and moderately difficult scoped fixes | GPT-6.1 Terra `max` |
-| Complex implementation helper | GPT-6.1 Sol `xhigh` |
-| Independent reviewer | GPT-6.1 Sol `high` |
-| Read-only architecture consultant | GPT-6 Astra `xhigh` |
-| Difficult implementation rescue | GPT-6 Astra `xhigh` |
+| Complex implementation helper | GPT-6.2 Sol `xhigh` |
+| Independent reviewer | GPT-6.2 Sol `high` |
+| Read-only architecture consultant | GPT-6.2 Astra `xhigh` |
+| Difficult implementation rescue | GPT-6.2 Astra `xhigh` |
 
-Ordinary work stays in the main thread. Simple or repetitive independent tasks can use Luna max. Regular features, known-pattern business logic, several-file changes and moderately difficult scoped fixes can use Terra max when the approach, contracts and checks are clear; screenshot-driven UI adjustments are another suitable bounded assignment. Sol xhigh is reserved for tightly coupled cross-module changes, concurrency/transactions, difficult bugs and contract-heavy refactors. Astra xhigh handles consequential unresolved design questions or difficult implementation rescue; its read-only and writable roles remain separate.
+Ordinary work stays in the main thread. Use the bounded helper for simple or repetitive independent tasks. Use the implementation helper for known-pattern features, several-file changes, scoped fixes and screenshot-driven UI adjustments with clear contracts and checks. Both helpers use Terra max. Sol xhigh is reserved for tightly coupled cross-module changes, concurrency/transactions, difficult bugs and contract-heavy refactors. Astra xhigh handles consequential unresolved design questions or difficult implementation rescue; its read-only and writable roles remain separate.
 
-Select a suitable helper directly without traversing a fixed model ladder. Terra is an optional task-based choice, not a mandatory escalation step. Existing workable designs need no preliminary Astra pass or named baseline. The current owner can finish the remaining work without a forced return to Luna. Local design refinement stays with the main thread, and the old major worker is merged into the complex helper. The skill cannot switch the active main-thread model or silently change a configured role's effort.
+Select a suitable helper directly without traversing a fixed model ladder. Terra is an optional task-based choice, not a mandatory escalation step. Existing workable designs need no preliminary Astra pass or named baseline. The current owner can finish the remaining work. Local design refinement stays with the main thread, and the old major worker is merged into the complex helper. The skill cannot switch the active main-thread model or silently change a configured role's effort.
 
 ## Install or update
 
@@ -35,7 +35,7 @@ Use Python 3.11+; no third-party packages are needed. From this repository or an
 python scripts/sync-config.py --install
 ```
 
-Installation validates the package, copies the skill and seven managed roles, and backs up changed existing files. On upgrade, retired PolyForge refiner and major-worker role files are backed up before removal. It preserves user config.toml, global defaults and unrelated roles. Unchanged installations write nothing.
+Installation validates the package, copies the skill and seven managed roles, and backs up changed existing files. On upgrade, retired PolyForge role files, including the former `polyforge-luna` role, are backed up before removal. It preserves user config.toml, global defaults and unrelated roles. Unchanged installations write nothing.
 
 Start a new/reloaded Codex session after updating so old skill and role instructions are replaced, then invoke `$polyforge`. Ordinary development does not require running an installation check before each task.
 

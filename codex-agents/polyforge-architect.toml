@@ -1,6 +1,6 @@
 name = "polyforge-architect"
 description = "Optional read-only architect for a consequential unresolved design decision."
-model = "gpt-6-astra"
+model = "gpt-6.2-astra"
 model_reasoning_effort = "xhigh"
 sandbox_mode = "read-only"
 
